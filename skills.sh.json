@@ -1,0 +1,15 @@
+{
+  "$schema": "https://skills.sh/schemas/skills.sh.schema.json",
+  "notGrouped": "bottom",
+  "groupings": [
+    {
+      "title": "J.P. Morgan Payments",
+      "description": "Onboarding, authentication, and API integration skills for J.P. Morgan Payments merchants.",
+      "skills": [
+        "jpm-integrations-get-started",
+        "jpm-oauth",
+        "jpm-merchant-integrations"
+      ]
+    }
+  ]
+}
