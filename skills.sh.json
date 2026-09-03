@@ -8,7 +8,9 @@
       "skills": [
         "jpm-integrations-get-started",
         "jpm-oauth",
-        "jpm-merchant-integrations"
+        "jpm-merchant-integrations",
+        "jpm-notifications",
+        "jpm-csr"
       ]
     }
   ]

@@ -14,6 +14,23 @@ For additional information, refer to the [Online Payments API documentation](htt
 
 Authentication is handled by the merchant's auth module (set up via the `jpm-oauth` skill). Import `getAccessToken` (or your language's equivalent) from that module and use it as `Authorization: Bearer <token>` on every Online Payments API call. Do **not** reimplement OAuth here — the auth module already caches tokens correctly per JPM guidance.
 
+## Base URLs
+
+| Env | URL | Env var |
+|-----|-----|---------|
+| CAT | `https://api-ms-test.payments.jpmorgan.com/api/v2` | `JPM_ONLINE_API_URL` |
+| PROD | `https://api-ms.payments.jpmorgan.com/api/v2` | `JPM_ONLINE_API_URL` |
+
+Online Payments shares the host root with 3DS and Account Updater (Optimization & Protection family) and uses the `api/v2` path prefix — the `POST /payments`, `/refunds`, and `/payments/{transactionId}/captures` endpoints in the samples below all resolve against this base. Read it from the env var rather than hardcoding so a future host split doesn't require a code change.
+
+## EU / EMEA Compliance Requirements
+
+When the integration targets EMEA/EU, the following requirements apply. Confirm each is met **before production deployment**.
+
+- **Currency.** Submit transactions in **EUR** for the EU/EEA, or **GBP** for the UK, with the amount as an **integer in the smallest currency unit** (cents for EUR, pence for GBP) — e.g. €49.99 → `4999`, £49.99 → `4999`. Keep the submitted amount consistent with the price shown to the customer. `currency` must be ISO 4217 uppercase (`EUR` / `GBP`).
+- **PSD2 / SCA (3-D Secure).** Strong Customer Authentication is a regulatory requirement in the EU/EEA and UK. Unlike Checkout, Online Payments is a direct API integration, so **SCA is your responsibility** — you must satisfy it via 3-D Secure. Use either **orchestrated 3DS** (JPM runs the authentication flow; requires `browserInfo` and `paymentAuthenticationRequest`) or **passthrough 3DS** (you pass externally obtained `authentication.threeDS` results). See the "Auth-Capture with Orchestrated 3DS" and "Auth-Capture with Passthrough 3DS" samples below. Pass complete billing address details (`accountHolder.billingAddress`) to support address verification (AVS) and 3DS.
+- **Country code.** The billing address `countryCode` must be a valid **ISO 3166-1 alpha-3 code** (e.g. `FRA`, `DEU`, `NLD`, `GBR` — as in the `"USA"` samples throughout this file — not `France`, and not free text). Any free-text country input in your UI must be **replaced with a structured selector that returns the alpha-3 code** before production deployment.
+
 ## How Online Payments works
 
 ``` mermaid
@@ -130,7 +147,7 @@ flowchart TD
 **Capture methods explained:**
 
 | `captureMethod` | Behavior |
-|---|---|
+| --- | --- |
 | `NOW` | Authorization and capture happen in a single request. Funds are settled immediately. |
 | `DELAYED` | Authorization is placed; capture happens automatically at settlement time. |
 | `MANUAL` | Authorization is placed; you must explicitly capture via a separate API call. Use for split shipments or when the final amount is unknown at auth time. |
@@ -726,6 +743,13 @@ POST /fraudcheck
 
 Pass 3DS authentication results you obtained externally to the payment request:
 
+> **Note — passthrough consumes, it does not authenticate.** JPM forwards a 3DS result you obtained externally; it does not run authentication here. Establish *connect vs implement* first — see the "Special note" in `../SKILL.md` Step 2.
+>
+> - **Field mapping:** CAVV → `authenticationValue`, DS transaction ID → `authenticationTransactionId`, ECI → `electronicCommerceIndicator`.
+> - **Only submit on success** — a missing/placeholder cryptogram is soft-declined.
+> - **Cryptograms are single-use and time-bound** — never cache or reuse across transactions.
+> - **ECI:** `05`/`02` = fully authenticated (liability shift); `06`/`01` = attempted (network-specific).
+
 ```http
 POST /payments
 ```
@@ -892,6 +916,12 @@ POST /payments
   }
 }
 ```
+
+> **Note:** Orchestrated 3DS is a full round-trip — don't stop at the `POST`. Wire all three
+> parts: (1) redirect the browser to the challenge URL from the response, (2) a backend route
+> at `authenticationReturnUrl` that accepts the issuer's GET/POST return and sends the shopper
+> back into the app, and (3) a `GET /payments/{transactionId}` retrieve to confirm the final
+> status. Skipping (2) or (3) leaves the shopper stranded after authenticating.
 
 ### Paze Payment (Bundle)
 
@@ -1654,7 +1684,7 @@ Stored credential transactions use a combination of `initiatorType`, `accountOnF
 ### Key Fields
 
 | Field | Values | Description |
-|---|---|---|
+| --- | --- | --- |
 | `initiatorType` | `CARDHOLDER`, `MERCHANT` | Who initiated the transaction |
 | `accountOnFile` | `NOT_STORED`, `TO_BE_STORED`, `STORED` | Credential storage state |
 | `recurring.recurringSequence` | `FIRST`, `SUBSEQUENT` | Position in a recurring series |
@@ -2251,7 +2281,7 @@ Also applies when a cardholder's recurring card was declined, the issue is resol
 #### Cardholder-Initiated Transactions
 
 | Use Case | `initiatorType` | `accountOnFile` | `recurringSequence` | `isAmountFinal` | Message Type |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | One-time purchase, not storing credentials | `CARDHOLDER` | `NOT_STORED` | — | `true` | CGEN |
 | First purchase, storing credentials | `CARDHOLDER` | `TO_BE_STORED` | — | `true` | CSTO |
 | First recurring, storing credentials | `CARDHOLDER` | `TO_BE_STORED` | `FIRST` | `true` | CREC |
@@ -2265,7 +2295,7 @@ Also applies when a cardholder's recurring card was declined, the issue is resol
 #### Merchant-Initiated Transactions
 
 | Use Case | `initiatorType` | `accountOnFile` | `recurringSequence` | `authorizationPurpose` | Message Type |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Unscheduled charge | `MERCHANT` | `STORED` | — | — | MUSE |
 | Subsequent recurring | `MERCHANT` | `STORED` | `SUBSEQUENT` | — | MREC |
 | Variable recurring (MC only) | `MERCHANT` | `STORED` | `SUBSEQUENT` | — | MREV |
@@ -2812,7 +2842,7 @@ If a cardholder requests to delay their next billing (e.g., "pause my subscripti
 ### Recurring Subscription Field Reference
 
 | Scenario | `initiatorType` | `accountOnFile` | `recurringSequence` | `isVariableAmount` | `authorizationPurpose` | Type |
-|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- |
 | Sign-up (first charge) | `CARDHOLDER` | `TO_BE_STORED` | `FIRST` | — | — | CREC |
 | Sign-up (variable, MC) | `CARDHOLDER` | `TO_BE_STORED` | `FIRST` | `true` | — | CREV |
 | Sign-up (card on file exists) | `CARDHOLDER` | `STORED` | `FIRST` | — | — | CREC |

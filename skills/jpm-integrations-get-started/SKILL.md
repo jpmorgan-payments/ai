@@ -1,6 +1,8 @@
 ---
 name: jpm-integrations-get-started
 description: Triage and credential intake for merchants starting with J.P. Morgan Payments APIs. Use this skill when the user wants to migrate from another payment provider to JPM or start a new JPM integration from scratch. Sets up a .env file (generated fresh or updated in place) with the clientId, certificate path, and private key path that downstream skills will read at runtime. Does not persist credential contents.
+metadata:
+  version: 2.0.0
 ---
 
 # JPM Integrations — Get Started
@@ -124,8 +126,6 @@ If **Yes**:
 3. **Hand off to `jpm-oauth`.** Invoke the `jpm-oauth` skill via the Skill tool. The OAuth skill picks up the conversation context — credentials location, SHA-1 thumbprint, integration intent from Step 1, and target stack (language + HTTP client + JWT library) — and only asks the user for what it doesn't already know (target environment CAT/PROD, JWT TTL, and output location for the generated code). The `resource_id` is read from `JPM_RESOURCE_ID` in the `.env` at runtime — the user fills it in using the comment already in `.env.example`, no question is asked. Exit this skill once `jpm-oauth` takes over.
 
 ## Step 5 — Not yet onboarded
-
-<!-- TODO(content+legal): confirm exact wording with the content and legal teams before release. -->
 
 Tell the user:
 
