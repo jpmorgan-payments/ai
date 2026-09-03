@@ -8,17 +8,21 @@ A set of [Agent Skills](https://agentskills.io/) that give GitHub Copilot, Claud
 
 These skills rely on AI agents to produce code, and **all generated code must be reviewed and verified by a qualified engineer before being deployed to production**. AI-generated code can contain subtle correctness, security, or compliance defects.
 
+> **Early access.** Account Updater, Tokenization, 3-D Secure, and `jpm-notifications` are early access — expect to do additional testing and validation before relying on them.
+
 ---
 
 ## What's Inside
 
-This repository ships **three Agent Skills** that chain together. Each also works on its own.
+This repository ships **three Agent Skills** that chain together, plus two more you can use on their own: the standalone **`jpm-csr`** onboarding helper (generate a CSR) and **`jpm-notifications`**, a companion to `jpm-merchant-integrations` for receiving inbound webhook events.
 
 | Skill | Path | Purpose |
 | ----- | ---- | ------- |
 | `jpm-integrations-get-started` | [`skills/jpm-integrations-get-started/`](skills/jpm-integrations-get-started/SKILL.md) | Get started with J.P. Morgan Payments — disclaimer acknowledgment, goal triage, credential check, and `.env` setup |
 | `jpm-oauth` | [`skills/jpm-oauth/`](skills/jpm-oauth/SKILL.md) | Generates a working OAuth (JWT signing + IDAnywhere token exchange) module in your project, with token caching baked in |
 | `jpm-merchant-integrations` | [`skills/jpm-merchant-integrations/`](skills/jpm-merchant-integrations/SKILL.md) | Walks you through one API integration at a time — Checkout or Online Payments — and helps you expand by adding new APIs over time |
+| `jpm-csr` | [`skills/jpm-csr/`](skills/jpm-csr/SKILL.md) | **Standalone onboarding helper** (independent of the chain above) — generates a Certificate Signing Request (CSR) + private key to send to your J.P. Morgan Relationship Manager for client ID provisioning. Run it before onboarding if you don't yet have credentials |
+| `jpm-notifications` | [`skills/jpm-notifications/`](skills/jpm-notifications/SKILL.md) | **Companion** to `jpm-merchant-integrations` — receive and verify inbound JPM webhook events (signature verification, optional mTLS, de-duplication) instead of polling. Assumes auth is already set up via `jpm-oauth` |
 
 Each skill folder is composed of three layers:
 
@@ -33,9 +37,12 @@ Each skill folder is composed of three layers:
 | API | Reference File | What It Covers |
 | --- | -------------- | -------------- |
 | **Checkout** | `skills/jpm-merchant-integrations/references/checkout.md` | Drop-in UI, Hosted Payments Page, checkout sessions, capture methods, field constraints |
-| **Online Payments** | `skills/jpm-merchant-integrations/references/online-payments.md` | Full payment lifecycle (auth, capture, void, refund), card / wallet / APM methods, 3-D Secure |
+| **Online Payments** | `skills/jpm-merchant-integrations/references/online-payments.md` | Full payment lifecycle (auth, capture, void, refund), card / wallet / APM methods, inline 3-D Secure |
+| **Tokenization** | `skills/jpm-merchant-integrations/references/tokenization.md` | Swap a card PAN for a merchant-scoped token to reduce PCI scope and store tokens instead of card data |
+| **3-D Secure (Standalone)** | `skills/jpm-merchant-integrations/references/3d-secure.md` | Standalone 3DS authentication (use the inline `threeDS` field in Online Payments when bundling with an auth) |
+| **Account Updater** | `skills/jpm-merchant-integrations/references/account-updater.md` | Keep stored cards current as issuers reissue them — inquiry mode (sync) or card-registration mode (async, via `jpm-notifications`) |
 
-More APIs (Tokenization, Reporting, and others) are planned for future releases.
+More APIs (Reporting and others) are planned for future releases.
 
 ---
 
@@ -116,9 +123,11 @@ Start with the first skill — it hands off automatically through the full seque
 
 | Goal | Slash command |
 | ---- | ------------- |
+| Generate a CSR + private key for onboarding | `/jpm-csr` |
 | Onboarding & `.env` setup | `/jpm-integrations-get-started` |
 | Generate OAuth module | `/jpm-oauth` |
 | Integrate Checkout or Online Payments | `/jpm-merchant-integrations` |
+| Receive & verify webhook events | `/jpm-notifications` |
 
 > Each skill checks its own prerequisites and will tell you what to run first if anything is missing.
 

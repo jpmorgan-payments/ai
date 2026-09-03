@@ -4,7 +4,7 @@
 
 Reuse what's already in `package.json`. If neither category is present, install:
 
-- **JWT signing**: `jsonwebtoken` (matches the JPM Bruno sample and SDK). For ESM-first / no-deps preference, `jose` is a fine substitute.
+- **JWT signing**: `jsonwebtoken`. For ESM-first / no-deps preference, `jose` is a fine substitute.
 - **HTTP**: native `fetch` (Node 18+). If the project already uses `axios`, `node-fetch`, `undici`, or `got`, use that instead.
 
 ## Reference module (TypeScript, Node 18+, ESM)

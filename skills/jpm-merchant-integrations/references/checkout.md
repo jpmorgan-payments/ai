@@ -8,6 +8,15 @@ Checkout is a pre-built solution that allows you to accept online payments secur
 - Add payment acceptance to an existing application
 - Understand the JPM Drop-in UI architecture and API surface
 
+## Base URLs
+
+| Env | URL | Env var |
+|-----|-----|---------|
+| CAT | `https://merchant-api.checkout-cat.merchant.jpmorgan.com/v1` | `JPM_CHECKOUT_API_URL` |
+| PROD | `https://merchant-api.checkout.merchant.jpmorgan.com/v1` | `JPM_CHECKOUT_API_URL` |
+
+Checkout runs on its own `merchant.jpmorgan.com` host root (distinct from the `payments.jpmorgan.com` Online Payments / 3DS / Account Updater family) and keeps the `/v1` path prefix. The browser-loaded Drop-in UI script is served from a separate host per environment — `https://checkout-cat.merchant.jpmorgan.com/drop-in-ui.mjs` (CAT) and `https://checkout.merchant.jpmorgan.com/drop-in-ui.mjs` (PROD) — see the Drop-in UI section below.
+
 ## How Checkout works
 
 ``` mermaid
@@ -162,6 +171,14 @@ Your backend server returns the `checkoutSessionToken` back to your web app, whe
 | `merchantOrderNumber` | Max **22 chars** | Long UUID → 400 |
 | `totalTransactionAmount` | Integer, **smallest currency unit** (cents) | Float dollars → wrong amount |
 | `currencyCode` | ISO 4217 uppercase (`USD`, `EUR`) | Lowercase → rejected |
+
+## EU / EMEA Compliance Requirements
+
+When the integration targets EMEA/EU, the following requirements apply. Confirm each is met **before production deployment**.
+
+- **Currency.** Submit transactions in **EUR** for the EU/EEA, or **GBP** for the UK, with the amount as an **integer in the smallest currency unit** (cents for EUR, pence for GBP) — e.g. €49.99 → `4999`, £49.99 → `4999`. Keep the submitted amount consistent with the price shown to the customer in your store. `currencyCode` must be ISO 4217 uppercase (`EUR` / `GBP`). (Reinforces the `totalTransactionAmount` / `currencyCode` rules in *Critical Field Constraints* above.)
+- **PSD2 / SCA (3-D Secure).** Strong Customer Authentication is a regulatory requirement in the EU/EEA. With Checkout, **3-D Secure authentication is handled automatically by the Checkout platform** — you do not orchestrate the 3DS flow yourself. To support this (and address verification / AVS), **pass complete billing address details** on the consumer in the checkout intent (`consumer.billingAddress`: `recipientFullName`, `line1`, `city`, `state`/region, `country`, `postalCode`). Missing or partial billing address data can cause SCA challenges or AVS checks to fail.
+- **Country code.** The billing address `country` must be a valid **ISO 3166-1 alpha-2 code** (e.g. `FR`, `DE`, `NL` — not `France`/`Germany`). Any free-text country input in your checkout UI must be **replaced with a structured selector that returns the alpha-2 code** before production deployment; free-text country entry is not acceptable for EMEA go-live.
 
 ## Payment Methods
 
