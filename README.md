@@ -14,7 +14,11 @@ These skills rely on AI agents to produce code, and **all generated code must be
 
 ## What's Inside
 
-This repository ships **three Agent Skills** that chain together, plus two more you can use on their own: the standalone **`jpm-csr`** onboarding helper (generate a CSR) and **`jpm-notifications`**, a companion to `jpm-merchant-integrations` for receiving inbound webhook events.
+This repository ships **seven Agent Skills** across two tracks — online and in-store. Within each track the skills chain together, and each also works on its own.
+
+### Online integrations
+
+Three skills chain together, plus two more you can use on their own: the standalone **`jpm-csr`** onboarding helper (generate a CSR) and **`jpm-notifications`**, a companion to `jpm-merchant-integrations` for receiving inbound webhook events.
 
 | Skill | Path | Purpose |
 | ----- | ---- | ------- |
@@ -23,6 +27,13 @@ This repository ships **three Agent Skills** that chain together, plus two more 
 | `jpm-merchant-integrations` | [`skills/jpm-merchant-integrations/`](skills/jpm-merchant-integrations/SKILL.md) | Walks you through one API integration at a time — Checkout or Online Payments — and helps you expand by adding new APIs over time |
 | `jpm-csr` | [`skills/jpm-csr/`](skills/jpm-csr/SKILL.md) | **Standalone onboarding helper** (independent of the chain above) — generates a Certificate Signing Request (CSR) + private key to send to your J.P. Morgan Relationship Manager for client ID provisioning. Run it before onboarding if you don't yet have credentials |
 | `jpm-notifications` | [`skills/jpm-notifications/`](skills/jpm-notifications/SKILL.md) | **Companion** to `jpm-merchant-integrations` — receive and verify inbound JPM webhook events (signature verification, optional mTLS, de-duplication) instead of polling. Assumes auth is already set up via `jpm-oauth` |
+
+### In-store integrations
+
+| Skill | Path | Purpose |
+| ----- | ---- | ------- |
+| `jpm-instore-get-started` | [`skills/jpm-instore-get-started/`](skills/jpm-instore-get-started/SKILL.md) | Conversational intake for a card-present integration against the J.P. Morgan Payments Terminal Application on Ingenico AXIUM terminals — triages new build vs. migration, runs a network questionnaire, and sets up an `instore.env` |
+| `jpm-instore-payments` | [`skills/jpm-instore-payments/`](skills/jpm-instore-payments/SKILL.md) | Implements the semi-integrated terminal integration one operation at a time — setup/management, certificate operations, and payment operations such as sale, refund, void, gift cards, SAF, DCC, and settlement |
 
 Each skill folder is composed of three layers:
 
@@ -41,6 +52,7 @@ Each skill folder is composed of three layers:
 | **Tokenization** | `skills/jpm-merchant-integrations/references/tokenization.md` | Swap a card PAN for a merchant-scoped token to reduce PCI scope and store tokens instead of card data |
 | **3-D Secure (Standalone)** | `skills/jpm-merchant-integrations/references/3d-secure.md` | Standalone 3DS authentication (use the inline `threeDS` field in Online Payments when bundling with an auth) |
 | **Account Updater** | `skills/jpm-merchant-integrations/references/account-updater.md` | Keep stored cards current as issuers reissue them — inquiry mode (sync) or card-registration mode (async, via `jpm-notifications`) |
+| **In-Store (semi-integrated terminal)** | `skills/jpm-instore-payments/references/official-protocol-reference.md` | Semi-integrated WebSocket protocol, terminal operations, transaction types, result codes, SAF / DCC / settlement, certificate operations |
 
 More APIs (Reporting and others) are planned for future releases.
 
@@ -71,7 +83,7 @@ Inside Claude Code, run:
 /plugin install jpm-payments-skills@jpm-payments-skills
 ```
 
-After install, run `/plugin` to confirm it's listed and `/skills` to see the three `jpm-*` skills.
+After install, run `/plugin` to confirm it's listed and `/skills` to see the seven `jpm-*` skills.
 
 To update later:
 
@@ -103,7 +115,7 @@ cp -r /tmp/jpm-skills/skills/jpm-* .github/skills/
 
 Open your project in VS Code or a JetBrains IDE with GitHub Copilot Chat enabled, then start asking questions. Copilot loads the relevant skill automatically when your prompt matches the skill's `description` field.
 
-> **Tip:** You can invoke a skill explicitly via its slash command (for example, `/jpm-integrations-get-started`, `/jpm-oauth`, or `/jpm-merchant-integrations`) — works the same in both Claude Code and GitHub Copilot. Otherwise, any prompt that matches the skill's `description` field triggers it automatically.
+> **Tip:** You can invoke a skill explicitly via its slash command (for example, `/jpm-integrations-get-started`, `/jpm-oauth`, `/jpm-merchant-integrations`, `/jpm-instore-get-started`, or `/jpm-instore-payments`) — works the same in both Claude Code and GitHub Copilot. Otherwise, any prompt that matches the skill's `description` field triggers it automatically.
 
 ---
 
@@ -111,13 +123,21 @@ Open your project in VS Code or a JetBrains IDE with GitHub Copilot Chat enabled
 
 ### Full walkthrough (recommended)
 
-Start with the first skill — it hands off automatically through the full sequence:
+Start with the first skill in your track — it hands off automatically through the full sequence:
 
 ```text
 /jpm-integrations-get-started
 ```
 
 `jpm-integrations-get-started` → `jpm-oauth` → `jpm-merchant-integrations`
+
+For an in-store (card-present) integration, start with:
+
+```text
+/jpm-instore-get-started
+```
+
+`jpm-instore-get-started` → `jpm-instore-payments`
 
 ### Individual skills
 
@@ -128,6 +148,8 @@ Start with the first skill — it hands off automatically through the full seque
 | Generate OAuth module | `/jpm-oauth` |
 | Integrate Checkout or Online Payments | `/jpm-merchant-integrations` |
 | Receive & verify webhook events | `/jpm-notifications` |
+| In-store onboarding & `instore.env` setup | `/jpm-instore-get-started` |
+| Integrate in-store terminal operations | `/jpm-instore-payments` |
 
 > Each skill checks its own prerequisites and will tell you what to run first if anything is missing.
 
@@ -142,10 +164,14 @@ Start with the first skill — it hands off automatically through the full seque
 │   └── marketplace.json
 ├── .github/
 │   └── workflows/                    # daily GitHub traffic-metrics collection
-├── skills/                           # the three agent skills
+├── skills/                           # the seven agent skills
 │   ├── jpm-integrations-get-started/
 │   ├── jpm-oauth/
-│   └── jpm-merchant-integrations/
+│   ├── jpm-merchant-integrations/
+│   ├── jpm-csr/
+│   ├── jpm-notifications/
+│   ├── jpm-instore-get-started/
+│   └── jpm-instore-payments/
 ├── LICENSE
 └── README.md
 ```

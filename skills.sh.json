@@ -3,7 +3,7 @@
   "notGrouped": "bottom",
   "groupings": [
     {
-      "title": "J.P. Morgan Payments",
+      "title": "J.P. Morgan Payments — Online",
       "description": "Onboarding, authentication, and API integration skills for J.P. Morgan Payments merchants.",
       "skills": [
         "jpm-integrations-get-started",
@@ -11,6 +11,14 @@
         "jpm-merchant-integrations",
         "jpm-notifications",
         "jpm-csr"
+      ]
+    },
+    {
+      "title": "J.P. Morgan Payments — In-Store",
+      "description": "Semi-integrated terminal integration skills for the J.P. Morgan Payments Terminal Application on Ingenico AXIUM terminals.",
+      "skills": [
+        "jpm-instore-get-started",
+        "jpm-instore-payments"
       ]
     }
   ]

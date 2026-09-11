@@ -1,6 +1,6 @@
 {
   "name": "jpm-payments-skills",
-  "description": "Conversational agent skills that walk a merchant from J.P. Morgan Payments onboarding through a working API integration. Supports Checkout and Online Payments in the initial release. Generates language-specific OAuth modules (Node/TypeScript, Python, Java idiomatic; other languages via canonical algorithm).",
+  "description": "Conversational agent skills that walk a merchant from J.P. Morgan Payments onboarding through a working API integration. Covers online Checkout and Online Payments, plus in-store semi-integrated terminal integration on Ingenico AXIUM terminals. Generates language-specific OAuth modules (Node/TypeScript, Python, Java idiomatic; other languages via canonical algorithm).",
   "version": "1.0.0",
   "author": {
     "name": "J.P. Morgan Payments"
@@ -19,6 +19,11 @@
     "jwt",
     "checkout",
     "online-payments",
+    "in-store",
+    "card-present",
+    "semi-integrated",
+    "terminal",
+    "axium",
     "integration"
   ]
 }

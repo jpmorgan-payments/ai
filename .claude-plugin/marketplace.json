@@ -1,14 +1,14 @@
 {
   "name": "jpm-payments-skills",
   "version": "1.0.0",
-  "description": "J.P. Morgan Payments developer-experience marketplace. Distributes the jpm-payments-skills plugin (onboarding intake, OAuth code generation, and Checkout / Online Payments integration) for Claude Code and GitHub Copilot.",
+  "description": "J.P. Morgan Payments developer-experience marketplace. Distributes the jpm-payments-skills plugin (onboarding intake, OAuth code generation, Checkout / Online Payments integration, and in-store semi-integrated terminal integration) for Claude Code and GitHub Copilot.",
   "owner": {
     "name": "J.P. Morgan Payments"
   },
   "plugins": [
     {
       "name": "jpm-payments-skills",
-      "description": "Conversational agent skills that walk a merchant from J.P. Morgan Payments onboarding through a working API integration. Supports Checkout and Online Payments in the initial release. Generates language-specific OAuth modules (Node/TypeScript, Python, Java idiomatic; other languages via canonical algorithm).",
+      "description": "Conversational agent skills that walk a merchant from J.P. Morgan Payments onboarding through a working API integration. Covers online Checkout and Online Payments, plus in-store semi-integrated terminal integration on Ingenico AXIUM terminals. Generates language-specific OAuth modules (Node/TypeScript, Python, Java idiomatic; other languages via canonical algorithm).",
       "version": "1.0.0",
       "source": "./",
       "license": "Apache-2.0",
@@ -24,6 +24,11 @@
         "jwt",
         "checkout",
         "online-payments",
+        "in-store",
+        "card-present",
+        "semi-integrated",
+        "terminal",
+        "axium",
         "integration"
       ],
       "homepage": "https://github.com/jpmorgan-payments/pdp-skills",
