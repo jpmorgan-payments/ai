@@ -18,8 +18,6 @@ This repository ships **seven Agent Skills** across two tracks — online and in
 
 ### Online integrations
 
-Three skills chain together, plus two more you can use on their own: the standalone **`jpm-csr`** onboarding helper (generate a CSR) and **`jpm-notifications`**, a companion to `jpm-merchant-integrations` for receiving inbound webhook events.
-
 | Skill | Path | Purpose |
 | ----- | ---- | ------- |
 | `jpm-integrations-get-started` | [`skills/jpm-integrations-get-started/`](skills/jpm-integrations-get-started/SKILL.md) | Get started with J.P. Morgan Payments — disclaimer acknowledgment, goal triage, credential check, and `.env` setup |
@@ -62,7 +60,7 @@ More APIs (Reporting and others) are planned for future releases.
 
 The skills are written in the open [Agent Skills](https://agentskills.io/) format and load in any compatible Agent harness. Below are the install paths:
 
-### Skills CLI 
+### Skills CLI
 
 [`npx skills`](https://www.skills.sh/) detects your Agent harness and installs into the right directory automatically:
 
@@ -74,7 +72,7 @@ npx skills add jpmorgan-payments/pdp-skills
 
 The fastest path is the Claude Code plugin manager — this repository ships as a plugin with a marketplace manifest at the root.
 
-#### Plugin install 
+#### Plugin install
 
 Inside Claude Code, run:
 
@@ -91,7 +89,7 @@ To update later:
 /plugin update jpm-payments-skills
 ```
 
-#### Manual install 
+#### Manual install
 
 If you'd rather copy the skills directly into your project, Claude Code auto-discovers any skills under `.claude/skills/`:
 
