@@ -3,6 +3,7 @@ name: jpm-oauth
 description: Implement J.P. Morgan Payments OAuth authentication (JWT signing + IDAnywhere token exchange) in a merchant project. Use this skill when a merchant has their clientId, certificate, private key, and SHA-1 thumbprint and wants to generate the auth code in their codebase — typically right after running jpm-integrations-get-started. Produces a language-specific auth module with built-in token caching that follows JPM guidance against regenerating tokens per request. Supports Node/TypeScript, Python, and Java idiomatically; for other languages, translates from the canonical algorithm. Asks for target environment (CAT or PROD) and JWT TTL (default 6 months for CAT, 8h for PROD per JPM guidance); the resource_id is read from the merchant's `.env` at runtime rather than collected interactively.
 metadata:
   version: 2.0.0
+  lob: commerce
 ---
 
 # JPM OAuth implementation

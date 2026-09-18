@@ -3,6 +3,7 @@ name: jpm-merchant-integrations
 description: Implement J.P. Morgan Payments API integrations in a merchant project once OAuth authentication is in place. Use this skill after a merchant has completed JPM onboarding and wired up authentication (typically right after `jpm-oauth`) and is ready to integrate one of the supported APIs — Checkout, Online Payments, Tokenization, 3-D Secure, or Account Updater. For inbound webhook handling, use the companion `jpm-notifications` skill instead. Recommends implementing one API at a time, reusing the credentials and auth module already wired into the project.
 metadata:
   version: 2.0.0
+  lob: commerce
 ---
 
 # JPM Merchant API Integrations

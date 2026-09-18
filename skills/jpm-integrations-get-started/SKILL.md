@@ -3,6 +3,7 @@ name: jpm-integrations-get-started
 description: Triage and credential intake for merchants starting with J.P. Morgan Payments APIs. Use this skill when the user wants to migrate from another payment provider to JPM or start a new JPM integration from scratch. Sets up a .env file (generated fresh or updated in place) with the clientId, certificate path, and private key path that downstream skills will read at runtime. Does not persist credential contents.
 metadata:
   version: 2.0.0
+  lob: commerce
 ---
 
 # JPM Integrations — Get Started

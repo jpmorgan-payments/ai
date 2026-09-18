@@ -27,6 +27,52 @@ Each component has its own README with full setup and usage instructions.
 
 ---
 
+## Agent skills
+
+[Agent skills](https://agentskills.io/) are instructions that agents can use to build faster and more accurately. J.P. Morgan Payments offers a collection of skills that give your agents working knowledge of the J.P. Morgan Payments APIs — onboarding, authentication, and integration.
+
+If you use one of these popular agent harnesses, we recommend installing the official J.P. Morgan Payments plugins, which bundle every skill and update automatically.
+
+### Claude Code
+
+Run these commands in your project:
+
+```text
+/plugin marketplace add https://github.com/jpmorgan-payments/ai
+/plugin install jpm-payments-skills@jpm-payments-skills
+```
+
+### Codex
+
+Run these commands in your project:
+
+```bash
+codex plugin marketplace add jpmorgan-payments/ai
+codex plugin add jpm-payments-skills@jpm-payments
+```
+
+### Cursor
+
+Run this command in your project:
+
+```text
+/add-plugin jpm-payments-skills
+```
+
+## Manual installation
+
+> Manually installed skills don't auto-update. Run `npx skills update -y` to get the latest versions.
+
+Run this command in your project:
+
+```bash
+npx skills add jpmorgan-payments/ai
+```
+
+See the [Agent Skills README](skills/README.md) for GitHub Copilot, local installs, and per-skill detail.
+
+---
+
 ## Troubleshooting
 
 | Symptom | Likely cause | What to try |

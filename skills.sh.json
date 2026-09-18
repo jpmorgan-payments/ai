@@ -3,8 +3,8 @@
   "notGrouped": "bottom",
   "groupings": [
     {
-      "title": "J.P. Morgan Payments",
-      "description": "Onboarding, authentication, and API integration skills for J.P. Morgan Payments merchants.",
+      "title": "J.P. Morgan Payments Commerce",
+      "description": "Onboarding, authentication, and API integration for J.P. Morgan Payments merchants.",
       "skills": [
         "jpm-integrations-get-started",
         "jpm-oauth",
