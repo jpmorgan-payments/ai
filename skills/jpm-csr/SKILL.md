@@ -3,6 +3,7 @@ name: jpm-csr
 description: Generate a Certificate Signing Request (CSR) and matching private key for JPM Payments API onboarding. Use this skill when a merchant needs to create a CSR to send to their JPM Relationship Manager (RM) for client ID provisioning via IDAHO/IDAnywhere, when generating a new key pair for JPM/Chase Orbital API authentication, or when preparing credentials before completing JPM onboarding. Supports CAT, PROD, or both environments at once and enforces the JPM rule that the CN must differ between CAT and PROD.
 metadata:
   version: 1.0.0
+  lob: commerce
 ---
 
 # JPM CSR Generation

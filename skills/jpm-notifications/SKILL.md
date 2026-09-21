@@ -3,6 +3,7 @@ name: jpm-notifications
 description: Receive and verify J.P. Morgan Payments webhook events (notifications) in a merchant project. Use when the merchant needs to consume server-to-server event callbacks from JPM — e.g., dispute opened, card updated, payment captured, refund processed — instead of polling REST endpoints. Covers webhook endpoint setup, JPM signing-key fetch, signature verification (EC default, RSA optional), optional mTLS, and CAT smoke test. Companion to `jpm-merchant-integrations`; assumes OAuth is already in place via `jpm-oauth`.
 metadata:
   version: 1.0.0
+  lob: commerce
 ---
 
 # JPM Payments Notifications (Webhooks)

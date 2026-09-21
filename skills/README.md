@@ -55,7 +55,7 @@ The skills are written in the open [Agent Skills](https://agentskills.io/) forma
 [`npx skills`](https://www.skills.sh/) detects your Agent harness and installs into the right directory automatically:
 
 ```bash
-npx skills add jpmorgan-payments/pdp-skills
+npx skills add jpmorgan-payments/ai
 ```
 
 ### Claude Code
@@ -67,11 +67,11 @@ The fastest path is the Claude Code plugin manager — this repository ships as 
 Inside Claude Code, run:
 
 ```text
-/plugin marketplace add https://github.com/jpmorgan-payments/pdp-skills
+/plugin marketplace add https://github.com/jpmorgan-payments/ai
 /plugin install jpm-payments-skills@jpm-payments-skills
 ```
 
-After install, run `/plugin` to confirm it's listed and `/skills` to see the three `jpm-*` skills.
+After install, run `/plugin` to confirm it's listed and `/skills` to see the five `jpm-*` skills.
 
 To update later:
 
@@ -84,19 +84,65 @@ To update later:
 If you'd rather copy the skills directly into your project, Claude Code auto-discovers any skills under `.claude/skills/`:
 
 ```bash
-git clone https://github.com/jpmorgan-payments/pdp-skills /tmp/jpm-skills
+git clone https://github.com/jpmorgan-payments/ai /tmp/jpm-skills
 mkdir -p .claude/skills
 cp -r /tmp/jpm-skills/skills/jpm-* .claude/skills/
 ```
 
 For a user-level install (every Claude Code project sees the skills), copy into `~/.claude/skills/` instead.
 
+### Codex
+
+Add this repository as a plugin marketplace, then install the plugin:
+
+```bash
+codex plugin marketplace add jpmorgan-payments/ai
+codex plugin add jpm-payments-skills@jpm-payments
+```
+
+`jpm-payments` is the marketplace name declared in `.codex-plugin/marketplace.json`; `jpm-payments-skills` is the plugin inside it. Confirm with `codex plugin list`.
+
+To update later:
+
+```bash
+codex plugin marketplace upgrade jpm-payments
+codex plugin add jpm-payments-skills@jpm-payments
+```
+
+### Cursor
+
+In Cursor's Chat or Agent window, run:
+
+```text
+/add-plugin jpm-payments-skills
+```
+
+Cursor prompts for an install scope — **User** to sync it across your account, or **Project** to limit it to the current workspace. Requires Cursor 2.5 or later, and resolves against the marketplaces you have access to: Cursor's official marketplace (curated — repositories are submitted to and reviewed by the Cursor team) plus any team marketplace your organization has added.
+
+Installed plugins are managed from **Customize** in the sidebar, where the five `jpm-*` skills appear under **Agent Decides** and can also be invoked directly as `/jpm-…`.
+
+If the plugin isn't available to you from a marketplace yet, use one of the following.
+
+**Team marketplace** (Teams and Enterprise plans) — in the Cursor dashboard, go to **Plugins & MCPs → Team Marketplaces → Add Marketplace** and use **Import from Repo** with this repository's URL. Teammates can then install it as above. Turning on **Auto Refresh** under Marketplace Settings picks up new pushes automatically — it needs the Cursor GitHub App on the repository and re-indexes at most once every 10 minutes.
+
+**Local install** — copy the Cursor plugin into Cursor's local plugin folder:
+
+```bash
+git clone https://github.com/jpmorgan-payments/ai /tmp/jpm-ai
+mkdir -p ~/.cursor/plugins/local/jpm-payments-skills
+cp -R /tmp/jpm-ai/providers/cursor/plugin/. ~/.cursor/plugins/local/jpm-payments-skills/
+```
+
+Restart Cursor or run **Developer: Reload Window**, then open **Customize** to confirm the five `jpm-*` skills.
+
+> Copy the files rather than symlinking — Cursor skips symlinks in `~/.cursor/plugins/local` whose target resolves outside that folder. On Teams and Enterprise, local plugins require **Allow Local Plugin Imports** (Dashboard → Settings → Security & Identity → Marketplace and Plugins), which is off by default on Enterprise.
+
 ### GitHub Copilot
 
 GitHub Copilot automatically discovers skills placed in `.github/skills/` at the root of your repository. No extra configuration is needed.
 
 ```bash
-git clone https://github.com/jpmorgan-payments/pdp-skills /tmp/jpm-skills
+git clone https://github.com/jpmorgan-payments/ai /tmp/jpm-skills
 mkdir -p .github/skills
 cp -r /tmp/jpm-skills/skills/jpm-* .github/skills/
 ```

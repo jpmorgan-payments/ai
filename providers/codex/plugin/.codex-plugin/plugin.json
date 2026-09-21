@@ -1,0 +1,34 @@
+{
+  "name": "jpm-payments-skills",
+  "description": "J.P. Morgan Payments plugin for Codex — onboarding intake, CSR generation, OAuth code generation, API integration (Checkout, Online Payments, Tokenization, 3-D Secure, Account Updater), and inbound webhook handling.",
+  "version": "2.1.0",
+  "author": {
+    "name": "J.P. Morgan Payments",
+    "url": "https://developer.payments.jpmorgan.com"
+  },
+  "homepage": "https://developer.payments.jpmorgan.com",
+  "repository": "https://github.com/jpmorgan-payments/ai",
+  "license": "Apache-2.0",
+  "keywords": [
+    "jpm",
+    "jpmorgan",
+    "chase",
+    "payments",
+    "integration",
+    "commerce"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "J.P. Morgan Payments",
+    "developerName": "J.P. Morgan Payments",
+    "shortDescription": "J.P. Morgan Payments — All Skills",
+    "longDescription": "Build with J.P. Morgan Payments APIs: onboarding intake, CSR generation, OAuth code generation, API integration (Checkout, Online Payments, Tokenization, 3-D Secure, Account Updater), and inbound webhook handling.",
+    "category": "Finance",
+    "capabilities": [],
+    "websiteURL": "https://developer.payments.jpmorgan.com",
+    "defaultPrompt": [
+      "Use J.P. Morgan Payments to help with this task"
+    ],
+    "screenshots": []
+  }
+}

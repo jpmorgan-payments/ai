@@ -139,3 +139,19 @@ application-local.yml
 .idea
 # Demo/screen-recording videos (carried from internal repo)
 *.mp4
+
+# Credential material. The jpm-csr skill generates a private key and CSR on disk, and
+# jpm-oauth reads a cert + key at runtime — none of it may ever reach a commit.
+*.pem
+*.key
+*.csr
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+*.jks
+
+# CAT and PROD use different credentials, so per-environment .env files are likely.
+.env.*
+!.env.example
