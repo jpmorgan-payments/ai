@@ -20,6 +20,10 @@
 # - changed recommendation() to related(), and changed the implementation
 #   to use BeautifulSoup to extract links from the page, instead of calling AWS Doc API.
 # - changed search API to JPMC-PDP search API; changed aws doc website to jpmc pdp website.
+# - related() now goes through the same validated fetch path as read_documentation()
+#   (see server_utils.read_documentation_page_raw / validate_documentation_url), closing
+#   the SSRF gap where related() fetched caller-supplied URLs without the domain
+#   allowlist read_documentation() already enforced. (RDI-159)
 
 """JPMorgan Chase (JPMC) Payments Developer Portal (PDP) API Documentation
 MCP Server implementation.
@@ -31,7 +35,6 @@ searching the JPMorgan Chase Payments API documentation.
 # Standard library imports
 import json
 import os
-import re
 import sys
 import uuid
 
@@ -50,8 +53,10 @@ from .models import (
 )
 from .server_utils import (
     DEFAULT_USER_AGENT,
+    InvalidDocumentationUrlError,
     read_documentation_impl,
     read_documentation_page_raw,
+    validate_documentation_url,
 )
 from .util import (
     parse_recommendation_results,
@@ -247,11 +252,11 @@ async def read_documentation(
     """
     # Validate that URL is from developer.payments.jpmorgan.com.
     url_str = str(url)
-    if not re.match(r'^https?://developer\.payments\.jpmorgan\.com/', url_str):
-        await ctx.error(
-            f'Invalid URL: {url_str}. URL must be from the developer.payments.jpmorgan.com domain'
-        )
-        raise ValueError('URL must be from the developer.payments.jpmorgan.com domain')
+    try:
+        validate_documentation_url(url_str)
+    except InvalidDocumentationUrlError as e:
+        await ctx.error(str(e))
+        raise ValueError(str(e)) from e
 
     return await read_documentation_impl(ctx, url_str, 5000, 0, SESSION_UUID)
 
