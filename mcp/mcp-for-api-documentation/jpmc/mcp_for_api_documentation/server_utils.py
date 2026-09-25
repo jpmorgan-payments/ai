@@ -18,6 +18,10 @@
 # Significant changes include:
 # - changed several naming, from AWS to JPMorgan Chase (JPMC)/Payments Developer Portal (PDP).
 # - extracted read_documentation_page_raw() from read_documentation_impl() for better reuse.
+# - added validate_documentation_url() as the single allowlist/SSRF guard shared by every
+#   tool that dereferences a caller-supplied URL, and made read_documentation_page_raw()
+#   enforce it (including on every redirect hop) instead of trusting httpx's redirect
+#   follower. (RDI-159)
 
 """Utility functions for fetching and processing documentation pages.
 
@@ -26,9 +30,10 @@ Payments Developer Portal (PDP) API Documentation MCP Server.
 """
 
 import httpx
+import ipaddress
 import os
-from typing import Tuple, Optional
-
+import re
+import socket
 from .util import (
     extract_content_from_html,
     format_documentation_result,
@@ -37,6 +42,8 @@ from .util import (
 from importlib.metadata import version
 from loguru import logger
 from mcp.server.fastmcp import Context
+from typing import Tuple
+from urllib.parse import urlparse
 
 
 # Determine package version for user agent
@@ -53,12 +60,96 @@ DEFAULT_USER_AGENT = (
     f'ModelContextProtocol/{__version__} (PDP Documentation Server)'
 )
 
+# The only host any tool in this server is allowed to fetch. Every tool that
+# dereferences a caller-supplied URL (read_documentation, related, ...) MUST
+# route through validate_documentation_url() / read_documentation_page_raw()
+# below rather than reimplementing this check, so the allowlist can't drift
+# out of sync between tools again.
+ALLOWED_DOC_URL_PATTERN = re.compile(r'^https?://developer\.payments\.jpmorgan\.com(/.*)?$')
+
+# Cap on redirect hops we will follow for a single fetch.
+MAX_REDIRECTS = 5
+
+
+class InvalidDocumentationUrlError(ValueError):
+    """Raised when a URL fails the domain allowlist or SSRF defense-in-depth checks."""
+
+
+def _reject_private_address(hostname: str) -> None:
+    """Resolve hostname and reject it if any resolved address is non-public.
+
+    Defense-in-depth against DNS rebinding / misconfiguration: even though the
+    allowlist restricts the host to developer.payments.jpmorgan.com, refuse to
+    connect if that name (or a redirect target) ever resolves to a private,
+    loopback, link-local, unspecified, reserved, or multicast address.
+    """
+    try:
+        ip = ipaddress.ip_address(hostname)
+        addresses = [ip]
+    except ValueError:
+        try:
+            resolved = socket.getaddrinfo(hostname, None)
+        except socket.gaierror as e:
+            raise InvalidDocumentationUrlError(f'Could not resolve host: {hostname}') from e
+        addresses = [ipaddress.ip_address(info[4][0]) for info in resolved]
+
+    for address in addresses:
+        if (
+            address.is_private
+            or address.is_loopback
+            or address.is_link_local
+            or address.is_unspecified
+            or address.is_reserved
+            or address.is_multicast
+        ):
+            raise InvalidDocumentationUrlError(
+                f'Host {hostname} resolves to a disallowed address: {address}'
+            )
+
+
+def validate_documentation_url(url_str: str) -> None:
+    """Validate a URL is safe to fetch.
+
+    Checks for an allowlisted scheme+host, no userinfo, and no
+    private/loopback/link-local resolved address.
+
+    This is the single guard every tool that fetches a caller-supplied URL must
+    call before dereferencing it. Raises InvalidDocumentationUrlError if the URL
+    is not allowed.
+    """
+    parsed = urlparse(url_str)
+
+    if parsed.scheme not in ('http', 'https'):
+        raise InvalidDocumentationUrlError(
+            f'Invalid URL: {url_str}. Only http/https URLs are allowed'
+        )
+
+    if parsed.username or parsed.password:
+        raise InvalidDocumentationUrlError(
+            f'Invalid URL: {url_str}. URLs with embedded credentials are not allowed'
+        )
+
+    if not ALLOWED_DOC_URL_PATTERN.match(url_str):
+        raise InvalidDocumentationUrlError(
+            f'Invalid URL: {url_str}. URL must be from the developer.payments.jpmorgan.com domain'
+        )
+
+    if not parsed.hostname:
+        raise InvalidDocumentationUrlError(f'Invalid URL: {url_str}. Missing host')
+
+    _reject_private_address(parsed.hostname)
+
 
 async def read_documentation_page_raw(
     ctx: Context,
     url_str: str,
 ) -> Tuple[str, str]:
     """Fetch raw HTML content from a documentation page.
+
+    Validates url_str (and every redirect hop) against the domain allowlist and
+    SSRF defense-in-depth checks in validate_documentation_url() before issuing
+    any request, and does not delegate redirect-following to httpx so that each
+    hop is re-validated.
 
     Args:
         ctx: MCP context for logging and error handling
@@ -70,6 +161,14 @@ async def read_documentation_page_raw(
     """
     logger.debug(f'Fetching documentation from {url_str}')
 
+    try:
+        validate_documentation_url(url_str)
+    except InvalidDocumentationUrlError as e:
+        error_msg = f'Failed to fetch {url_str}: {str(e)}'
+        logger.error(error_msg)
+        await ctx.error(error_msg)
+        return error_msg, 'text/plain'
+
     # Configure proxy settings from environment variables
     proxy_url = os.getenv('HTTP_PROXY') or os.getenv('HTTPS_PROXY')
     client_kwargs = {}
@@ -77,32 +176,55 @@ async def read_documentation_page_raw(
         client_kwargs['proxy'] = proxy_url
         logger.debug(f'Using proxy: {proxy_url}')
 
+    current_url = url_str
     async with httpx.AsyncClient(**client_kwargs) as client:
-        try:
-            response = await client.get(
-                url_str,
-                follow_redirects=True,
-                headers={
-                    'User-Agent': DEFAULT_USER_AGENT,
-                },
-                timeout=30,
-            )
-        except httpx.HTTPError as e:
-            error_msg = f'Failed to fetch {url_str}: {str(e)}'
-            logger.error(error_msg)
-            await ctx.error(error_msg)
-            return error_msg, 'text/plain'
+        for _ in range(MAX_REDIRECTS + 1):
+            try:
+                response = await client.get(
+                    current_url,
+                    follow_redirects=False,
+                    headers={
+                        'User-Agent': DEFAULT_USER_AGENT,
+                    },
+                    timeout=30,
+                )
+            except httpx.HTTPError as e:
+                error_msg = f'Failed to fetch {current_url}: {str(e)}'
+                logger.error(error_msg)
+                await ctx.error(error_msg)
+                return error_msg, 'text/plain'
 
-        if response.status_code >= 400:
-            error_msg = f'Failed to fetch {url_str} - status code {response.status_code}'
-            logger.error(error_msg)
-            await ctx.error(error_msg)
-            return error_msg, 'text/plain'
+            if response.is_redirect:
+                next_url = str(response.next_request.url) if response.next_request else None
+                if not next_url:
+                    error_msg = f'Failed to fetch {current_url}: redirect with no Location'
+                    logger.error(error_msg)
+                    await ctx.error(error_msg)
+                    return error_msg, 'text/plain'
 
-        page_raw = response.text
-        content_type = response.headers.get('content-type', '')
+                try:
+                    validate_documentation_url(next_url)
+                except InvalidDocumentationUrlError as e:
+                    error_msg = f'Failed to fetch {current_url}: redirected to disallowed URL {next_url}: {str(e)}'
+                    logger.error(error_msg)
+                    await ctx.error(error_msg)
+                    return error_msg, 'text/plain'
 
-    return page_raw, content_type
+                current_url = next_url
+                continue
+
+            if response.status_code >= 400:
+                error_msg = f'Failed to fetch {current_url} - status code {response.status_code}'
+                logger.error(error_msg)
+                await ctx.error(error_msg)
+                return error_msg, 'text/plain'
+
+            return response.text, response.headers.get('content-type', '')
+
+    error_msg = f'Failed to fetch {url_str}: too many redirects'
+    logger.error(error_msg)
+    await ctx.error(error_msg)
+    return error_msg, 'text/plain'
 
 
 async def read_documentation_impl(
