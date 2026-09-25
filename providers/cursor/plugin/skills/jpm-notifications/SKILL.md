@@ -1,6 +1,6 @@
 ---
 name: jpm-notifications
-description: Receive and verify J.P. Morgan Payments webhook events (notifications) in a merchant project. Use when the merchant needs to consume server-to-server event callbacks from JPM — e.g., dispute opened, card updated, payment captured, refund processed — instead of polling REST endpoints. Covers webhook endpoint setup, JPM signing-key fetch, signature verification (EC default, RSA optional), optional mTLS, and CAT smoke test. Companion to `jpm-merchant-integrations`; assumes OAuth is already in place via `jpm-oauth`.
+description: Receive and verify J.P. Morgan Payments webhook events (notifications) in a merchant project. Use when the merchant needs to consume server-to-server event callbacks from JPM — e.g., payment approved, card details updated, token state change, consumer profile created — instead of polling REST endpoints. Covers webhook endpoint setup, JPM signing-key fetch, signature verification (EC default, RSA optional), optional mTLS, and CAT smoke test. Companion to `jpm-merchant-integrations`; assumes OAuth is already in place via `jpm-oauth`.
 metadata:
   version: 1.0.0
   lob: commerce
@@ -44,14 +44,14 @@ Carry the choice into Step 3.
 
 Ask which event families the merchant cares about (free text). JPM organizes events into camelCase notification families with subscription-type subtypes — not dotted strings like `payment.captured`. The published families:
 
-- **`paymentUpdateNotification`** (Online Payments) — `PaymentApproved`, `PaymentDeclined`, `PaymentErrored`, `PaymentVoid`, `PaymentClosed`
-- **`tokenLifecycleNotification`** (Tokenization) — `CardDetailsUpdate`, `TokenStateChange`, `TokenProvisionUpdate`, `BulkTokenUpdate`
-- **`accountUpdateNotification`** (Account Updater) — `AccountUpdaterStatus` (plus Pay-by-Bank subtypes)
-- **`consumerProfileNotification`** — `Created`, `PaymentMethodCreated`, `PaymentMethodDeleted`, `BulkConsumerProfileUpdateNotification`
-- **`recurringProgramNotification`** — `PlanUpdated`, `PaymentApplied`, `PaymentNotApplied`, etc.
-- **`entityOnboardingNotification`**, **`merchantStatusNotification`**, **`payoutNotification`** (onboarding + payouts)
+- **`paymentUpdateNotification`** — Online Payments
+- **`tokenLifecycleNotification`** — Tokenization
+- **`accountUpdateNotification`** — Account Updater, Pay by Bank
+- **`consumerProfileNotification`** — Consumer Profile Management
+- **`recurringProgramNotification`** — Recurring billing
+- **`entityOnboardingNotification`**, **`merchantStatusNotification`**, **`payoutNotification`** — onboarding + payouts
 
-Use `["All"]` to subscribe to every subtype in a family. Full catalog and per-event payload shapes live in `references/webhooks.md`.
+Use `["All"]` to subscribe to every subtype in a family. The subscription types within each family, and per-event payload shapes, live in `references/webhooks.md`.
 
 **Notes on what this API does NOT cover:**
 - **Disputes does not publish events here.** Dispute state changes are discovered by polling `POST /disputes` and `POST /disputes/status-query` in the Disputes API. If the merchant's goal is dispute notifications, redirect them to the Disputes API docs on the developer portal — Disputes is not covered by `jpm-merchant-integrations`.
@@ -71,17 +71,11 @@ Follow `references/webhooks.md`. Cross-cutting principles:
 
 ## Step 4 — CAT smoke test
 
-The full smoke test recipe lives in `references/webhooks.md` under "CAT smoke test." High-level pattern:
-1. Register a CAT subscription via `POST /subscriptions` with your `callbackURL`.
-2. Fetch and cache the public signing key via `GET /publicKeys`.
-3. Trigger an upstream event (e.g., a CAT Online Payments authorization fires `paymentUpdateNotification.PaymentApproved`).
-4. Confirm: 2xx response, signature verified, event handed off to your async queue.
-5. Force a verification failure (flip a byte in the cached key) and confirm you reject with 401.
-6. Re-deliver the same event and confirm de-duplication by `notificationId`.
+Follow the "CAT smoke test" recipe in `references/webhooks.md`: register a CAT subscription, cache the public key, trigger a real upstream event, then confirm you return 2xx in time, verify the signature, reject a tampered one with 401, and de-duplicate a redelivery.
 
 ## Step 5 — Offer to add another
 
-Once one event family is flowing in CAT, ask if the merchant wants to wire additional families or move on to integrating an API that produces them — Online Payments, Tokenization, Account Updater, or Consumer Profile Management — via `jpm-merchant-integrations`. (Note: Disputes does not publish events through this API; dispute state is polled via the Disputes endpoints.)
+Once one event family is flowing in CAT, ask if the merchant wants to wire additional families or move on to integrating an API that produces them — Online Payments, Tokenization, Account Updater, or Consumer Profile Management — via `jpm-merchant-integrations`.
 
 ## Rules
 

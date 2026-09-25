@@ -97,7 +97,7 @@ JPM sends three headers on every webhook POST:
 |---|---|
 | `Signature` | Base64-encoded signature over the raw request body |
 | `Key-ID` | Identifier of the public key used to sign (use this to look up / refresh your cached key) |
-| `Signing-Algorithm` | Algorithm in use — `EC` (P-256 SHA-256) or `RSA` (3072-bit key) |
+| `Signing-Algorithm` | Algorithm in use — `EC` or `RSA`, per the details below |
 
 **Algorithm details (from portal):**
 - **EC (default):** verify using `SHA256withECDSA` against the EC P-256 public key.

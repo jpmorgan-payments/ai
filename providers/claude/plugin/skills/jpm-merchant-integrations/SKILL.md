@@ -8,7 +8,7 @@ metadata:
 
 # JPM Merchant API Integrations
 
-Guide a merchant through integrating one of the supported J.P. Morgan Payments APIs. Authentication is assumed to be in place — if it isn't, point the user at `jpm-integrations-get-started` (which hands off to `jpm-oauth`) and exit. For inbound webhooks, hand off to `jpm-notifications`.
+Guide a merchant through integrating one of the supported J.P. Morgan Payments APIs. Authentication is assumed to be in place. For inbound webhooks, hand off to `jpm-notifications`.
 
 ## Step 1 — Confirm prerequisites
 
@@ -93,7 +93,7 @@ Follow the steps in the chosen reference file. If you captured a `threeDSFlow` i
 - **Confirm output paths before writing.** Default to a sibling folder of the auth module (`src/checkout/`, `src/payments/`, etc.) but offer "new top-level folder" and "custom path" alternatives, the same way `jpm-oauth` did.
 - **Smoke test in CAT before PROD.** Each reference includes a minimal end-to-end test recipe — run it with the merchant's CAT credentials before any PROD config change.
 - **Hand off to `jpm-notifications` for inbound webhooks.** Several of these APIs deliver state changes via the JPM Notifications API — Online Payments (`paymentUpdateNotification`), Tokenization (`tokenLifecycleNotification`), Account Updater registration mode (`accountUpdateNotification`). Don't try to build the receiver inside this skill's code — point the merchant at `jpm-notifications` so signature verification, key rotation, and mTLS are done correctly in one place. **For Account Updater registration mode, the webhook is only step 1 of 3:** the notification payload is masked, so after receiving it the merchant must call the Account Updater `GET /account-updates/{requestId}` endpoint to retrieve the actual updated card details. Wiring only the notification (and skipping the GET) leaves the flow incomplete. 3-D Secure is synchronous-only and has no webhook events either.
-- **Passthrough 3DS is connect-only, not authenticate.** If `threeDSFlow` is "Passthrough", the code you generate consumes a pre-existing cryptogram; it does not authenticate the cardholder. Confirm the merchant either already has external 3DS to connect to, or understands they must implement that upstream 3DS logic themselves — see the "Special note" in Step 2.
+- **Passthrough 3DS is connect-only.** If `threeDSFlow` is "Passthrough", generate per the "Special note" in Step 2 — the code consumes a pre-existing cryptogram and does not authenticate the cardholder.
 
 ## Step 4 — Offer to add another
 
@@ -112,7 +112,6 @@ If **No**, exit with a one-line summary of which APIs were integrated this sessi
 
 ## Rules
 
-- Do not re-implement OAuth inside the integration code. The merchant's auth module already handles token fetching with caching. Re-implementing it inline is what JPM's "don't generate tokens per call" guidance warns against.
-- Confirm every output file path with the user before writing.
-- Only the APIs listed in Step 2 are supported by this skill. For anything else (Reporting, In-Store, Pay by Bank, etc.), defer politely and offer a supported API instead. For inbound webhooks, hand off to `jpm-notifications`.
+- Do not re-implement OAuth inside the integration code — import the merchant's existing `getAccessToken()`.
+- Only the APIs listed in Step 2 are supported by this skill; defer politely for anything else. For inbound webhooks, hand off to `jpm-notifications`.
 - Don't write CAT credentials into PROD config or vice versa. The auth module reads from env vars, so the merchant flips environments by switching `.env` files — never by editing source.

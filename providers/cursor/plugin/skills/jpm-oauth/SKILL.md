@@ -94,7 +94,7 @@ Always echo the final path back to the user and wait for confirmation before any
 4. Replace any `<DEFAULT_TTL_SEC>` placeholders in the reference code with the actual TTL chosen in Step 3, expressed in seconds (e.g. `28800` for 8h, `15552000` for 6 months).
 5. Write the file(s) to the path confirmed in Step 5.
 
-If "Both" was chosen in Step 2, the generated code reads `JPM_RESOURCE_ID` from the environment so the same binary works in CAT or PROD by swapping the `.env`. There's no per-environment branching in the source.
+Never branch on environment in the generated source — "Both" is already satisfied by reading `JPM_RESOURCE_ID` from the environment.
 
 ## Step 7 — Update env files and wrap up
 
@@ -102,7 +102,7 @@ The generated module reads these env vars at runtime:
 
 - `JPM_CLIENT_ID`
 - `JPM_PRIVATE_KEY_PATH`
-- `JPM_CERT_THUMBPRINT` *(SHA-1 hex; colons OK — code strips them)*
+- `JPM_CERT_THUMBPRINT`
 - `JPM_RESOURCE_ID`
 - `JPM_JWT_TTL_SEC` *(optional — defaults to the value baked into the generated code)*
 
@@ -137,7 +137,7 @@ Auth is now wired up. Ask whether the user wants to keep going into API integrat
 - Question: "Auth is in place. Want to integrate a J.P. Morgan Payments API now?"
 - Header: "Integrate API?"
 - Options:
-  - "Yes — pick an API to integrate (Checkout or Online Payments)"
+  - "Yes — pick an API to integrate (Checkout, Online Payments, Tokenization, 3-D Secure, or Account Updater)"
   - "No — I'll come back later"
 
 If **Yes**, invoke the `jpm-merchant-integrations` skill via the Skill tool. It picks up from here using the auth module path and credentials context already in conversation, so the user won't be re-asked anything they've already answered.

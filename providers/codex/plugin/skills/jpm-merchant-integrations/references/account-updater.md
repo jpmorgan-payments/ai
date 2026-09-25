@@ -15,13 +15,13 @@ Use this when:
 
 Two integration shapes:
 - **Inquiry mode** — synchronous: pass a card, get the latest known state back.
-- **Card-registration mode** — async: register cards once, then receive `card.updated` webhook events as issuers push changes. **The webhook payload carries only *masked* card data** — to obtain the updated card details you must call the GET endpoint after each notification. This mode therefore requires **both** `jpm-notifications` (to receive events) **and** the Account Updater GET endpoint (to retrieve the full result). Wire up `jpm-notifications` first.
+- **Card-registration mode** — async: register cards once, then receive `accountUpdateNotification` webhook events as issuers push changes. Requires **both** `jpm-notifications` (to receive events) **and** the Account Updater GET endpoint (to retrieve the full result — see *Reference flow*). Wire up `jpm-notifications` first.
 
 ## Prerequisites
 
 - Auth module + `getAccessToken()` already wired (see `../SKILL.md` Step 1).
 - A secure store for cards on file (PCI scope — use Tokenization if you can to avoid storing PANs directly; see `tokenization.md`).
-- **For card-registration mode only:** `jpm-notifications` skill applied, with a webhook endpoint hosted and signature verification working. You will also integrate the Account Updater **GET** endpoint — the notification payload is masked, so the GET call is how you retrieve the actual updated card details.
+- **For card-registration mode only:** `jpm-notifications` skill applied, with a webhook endpoint hosted and signature verification working, plus the Account Updater **GET** endpoint.
 
 ## Base URLs
 
@@ -43,7 +43,7 @@ All three card networks (Visa, Mastercard, Discover) share the same endpoint sha
 - **`GET  {{accountupdater_url}}/account-updates/{requestId}`** — retrieve the result/status of a prior submission. The `requestId` comes from the response of the original POST.
 - **`GET  {{accountupdater_url}}/healthcheck/account-updates`** — service health probe.
 
-For card-registration mode, async updates arrive via the Notifications API under the `accountUpdateNotification` family (subscription type `AccountUpdaterStatus`). See `jpm-notifications` for wiring up the webhook receiver. **The notification payload only contains masked card information** — it signals *that* an update occurred but not the full updated PAN/expiry. To read the actual updated card details, call `GET /account-updates/{requestId}` after receiving the notification.
+For card-registration mode, async updates arrive via the Notifications API under the `accountUpdateNotification` family (subscription type `AccountUpdaterStatus`). See `jpm-notifications` for wiring up the webhook receiver, and *Reference flow* below for why the notification alone is not enough.
 
 Response capture pattern: every POST returns `requestId` + `responseId`. Save both — `requestId` is the lookup key for the GET call. In registration mode, persist `requestId` against your card-on-file record so you can call the GET endpoint when the matching `accountUpdateNotification` arrives.
 

@@ -51,9 +51,11 @@ If **No**, go to Step 5. If **Yes**, go to Step 3.
 
 Read `templates/env.example` (relative to this skill directory) to determine the variable names this integration expects. Then look in the user's current working directory for a `.env` file and branch based on what you find. Do **not** ask the user "generate or update?" — the file's presence and contents determine the branch.
 
+Whenever a branch below writes `.env` or `.env.example`, also ensure `.env` is gitignored: read `.gitignore` in the project root and append a line equal to `.env` if it isn't already there, creating `.gitignore` if it doesn't exist.
+
 ### 3a — `.env` exists and has every expected variable set
 
-Tell the user (one line): "Your `.env` already has all expected JPM variables — skipping `.env` setup." Go to Step 4.
+Tell the user (one line): "Your `.env` already has all expected JPM variables — skipping `.env` setup."
 
 ### 3b — `.env` exists but is missing one or more expected variables
 
@@ -67,10 +69,7 @@ List the missing variable names to the user (names only — never echo values fr
 
 If **Yes**:
 1. Append each missing variable (with a placeholder value) to the bottom of `.env`. Do **not** overwrite values the user has already set.
-2. Read `.gitignore` in the project root. If a line equal to `.env` is not present, append `.env` to it. If `.gitignore` doesn't exist, create one containing `.env`.
-3. Confirm to the user which variables were added (by name only) and remind them to fill in any placeholders before running downstream skills.
-
-Go to Step 4 either way.
+2. Confirm to the user which variables were added (by name only) and remind them to fill in any placeholders before running downstream skills.
 
 ### 3c — No `.env` found
 
@@ -84,10 +83,9 @@ Ask:
 
 If **Yes**:
 1. Copy `templates/env.example` to `.env.example` in the user's current working directory.
-2. Read `.gitignore` in the project root. If a line equal to `.env` is not present, append `.env` to it. If `.gitignore` doesn't exist, create one containing `.env`.
-3. Tell the user: "Created `.env.example` in your project root and ensured `.env` is gitignored. Copy `.env.example` to `.env`, fill in the values, and do not commit `.env`. Downstream skills will read these at runtime."
+2. Tell the user: "Created `.env.example` in your project root and ensured `.env` is gitignored. Copy `.env.example` to `.env`, fill in the values, and do not commit `.env`. Downstream skills will read these at runtime."
 
-Go to Step 4 either way.
+All three branches continue to Step 4.
 
 ## Step 4 — Implement auth?
 
@@ -124,7 +122,7 @@ If **Yes**:
      - Preferred HTTP client (if none in manifest) — user can answer "any"
      - Preferred JWT library (if none in manifest) — user can answer "any"
 
-3. **Hand off to `jpm-oauth`.** Invoke the `jpm-oauth` skill via the Skill tool. The OAuth skill picks up the conversation context — credentials location, SHA-1 thumbprint, integration intent from Step 1, and target stack (language + HTTP client + JWT library) — and only asks the user for what it doesn't already know (target environment CAT/PROD, JWT TTL, and output location for the generated code). The `resource_id` is read from `JPM_RESOURCE_ID` in the `.env` at runtime — the user fills it in using the comment already in `.env.example`, no question is asked. Exit this skill once `jpm-oauth` takes over.
+3. **Hand off to `jpm-oauth`.** Invoke the `jpm-oauth` skill via the Skill tool. It picks up the conversation context — credentials location, integration intent from Step 1, and target stack (language + HTTP client + JWT library) — and asks the user only for what it doesn't already know. Exit this skill once `jpm-oauth` takes over.
 
 ## Step 5 — Not yet onboarded
 

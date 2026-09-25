@@ -44,7 +44,7 @@ If 3DS is invoked inline as part of an Online Payments authorization, see `onlin
 ## Core endpoints
 
 - **`POST {{3ds_url}}/authentications`** — *Prepare*: submit card + amount + addresses → returns `authenticationId` + `transactionId`.
-- **`POST {{3ds_url}}/authentications/{authenticationId}`** — *Perform*: submit full risk / browser / account context → returns the 3DS result (frictionless cryptogram, or a challenge to render in the browser). Omit `threeDSRequestorAuthenticationInfo.threeDSChallengeType` and let the issuer decide; only set it deliberately (`"CHALLENGE_REQUESTED"` forces step-up, `"NO_CHALLENGE"` requests frictionless and should not be a default).
+- **`POST {{3ds_url}}/authentications/{authenticationId}`** — *Perform*: submit full risk / browser / account context → returns the 3DS result (frictionless cryptogram, or a challenge to render in the browser). Leave `threeDSRequestorAuthenticationInfo.threeDSChallengeType` unset — see *Let the issuer decide* below.
 - **`GET  {{3ds_url}}/authentications/{authenticationId}`** — *Results*: read the final authentication outcome after a challenge completes. Response carries `authenticationResult.threeDomainSecureCompletion.threeDSAuthenticationValue` (CAVV) and `.electronicCommerceIndicator` (ECI) — the values you ultimately pass to Online Payments authorization. For a frictionless result these already come back on the Perform response; the GET is how you retrieve them once a challenge round-trip has finished.
 - **`GET  {{3ds_url}}/authentications/healthcheck`** — Health probe only. Returns service liveness; it does **not** carry a cryptogram.
 

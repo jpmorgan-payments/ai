@@ -68,8 +68,6 @@ flowchart LR
     style FI fill:#fff,stroke:#1a7a8a,color:#000
 ```
 
-[How it works: Online Payments API](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fcapabilities%2Fonline-payments%2Foverview.md)
-
 ## Relevant Documentation
 
 #### Online Payments
@@ -78,7 +76,6 @@ flowchart LR
 - [Testing](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Ftesting.md) Test your payment integration with pre-determined outcomes using test card data for Online Payments. Simulate various scenarios for 3-D Secure, network tokens, and alternative payment methods.
 - [Core concepts](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fcore-concepts.md) Review the core concepts for Online Payments and Checkout APIs on J.P. Morgan's Payments Developer Portal, covering payment lifecycle, security, integration, and environment reliability.
 - [Getting started](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fgetting-started.md) Get started with J.P. Morgan's Online Payments APIs: create a developer account, set up a workspace, apply for a live account, and integrate with our payment processing services.
-- [Online Payments](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fonline-payments.md)
 
 ##### Online Payments
 
@@ -2318,26 +2315,9 @@ Also applies when a cardholder's recurring card was declined, the issue is resol
 
 ### Common CIT/MIT Workflows
 
-#### Workflow 1: Subscription sign-up → recurring billing
+Subscription sign-up, decline recovery, and verification-first flows are covered end to end — with request bodies — in the **Recurring Subscriptions Guide** below.
 
-``` mermaid
-sequenceDiagram
-    participant CH as Cardholder
-    participant M as Merchant
-    participant API as Online Payments API
-
-    CH->>M: Signs up for subscription
-    M->>API: POST /payments (CREC: CARDHOLDER, TO_BE_STORED, FIRST)
-    API-->>M: transactionId + networkTransactionId
-    Note over M: Store networkTransactionId for future MIT
-
-    loop Monthly billing
-        M->>API: POST /payments (MREC: MERCHANT, STORED, SUBSEQUENT + networkTransactionId)
-        API-->>M: transactionId
-    end
-```
-
-#### Workflow 2: Card on file → cardholder reuse
+#### Workflow 1: Card on file → cardholder reuse
 
 ``` mermaid
 sequenceDiagram
@@ -2354,45 +2334,7 @@ sequenceDiagram
     API-->>M: transactionId
 ```
 
-#### Workflow 3: Recurring decline → cardholder re-initiates
-
-``` mermaid
-sequenceDiagram
-    participant CH as Cardholder
-    participant M as Merchant
-    participant API as Online Payments API
-
-    M->>API: POST /payments (MREC: MERCHANT, STORED, SUBSEQUENT)
-    API-->>M: Decline (insufficient funds)
-    M->>CH: Notification: card declined
-
-    Note over CH: Resolves issue with card issuer
-
-    CH->>M: Logs in, reprocesses payment
-    M->>API: POST /payments (CUSE: CARDHOLDER, STORED)
-    API-->>M: Approved
-```
-
-#### Workflow 4: Card verification → then recurring billing
-
-``` mermaid
-sequenceDiagram
-    participant CH as Cardholder
-    participant M as Merchant
-    participant API as Online Payments API
-
-    CH->>M: Signs up, adds card for future billing
-    M->>API: POST /payments (amount: 0, CARDHOLDER, TO_BE_STORED) — Verification
-    API-->>M: Verified + networkTransactionId
-    Note over M: Card verified, no funds held
-
-    loop Monthly billing
-        M->>API: POST /payments (MREC: MERCHANT, STORED, SUBSEQUENT + networkTransactionId)
-        API-->>M: transactionId
-    end
-```
-
-#### Workflow 5: Hotel stay with incremental auth
+#### Workflow 2: Hotel stay with incremental auth
 
 ``` mermaid
 sequenceDiagram
@@ -2414,7 +2356,7 @@ sequenceDiagram
     API-->>M: Captured
 ```
 
-#### Workflow 6: Multi-shipment with reauthorization
+#### Workflow 3: Multi-shipment with reauthorization
 
 ``` mermaid
 sequenceDiagram

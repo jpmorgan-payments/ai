@@ -176,17 +176,9 @@ Your backend server returns the `checkoutSessionToken` back to your web app, whe
 
 When the integration targets EMEA/EU, the following requirements apply. Confirm each is met **before production deployment**.
 
-- **Currency.** Submit transactions in **EUR** for the EU/EEA, or **GBP** for the UK, with the amount as an **integer in the smallest currency unit** (cents for EUR, pence for GBP) — e.g. €49.99 → `4999`, £49.99 → `4999`. Keep the submitted amount consistent with the price shown to the customer in your store. `currencyCode` must be ISO 4217 uppercase (`EUR` / `GBP`). (Reinforces the `totalTransactionAmount` / `currencyCode` rules in *Critical Field Constraints* above.)
+- **Currency.** Submit transactions in **EUR** for the EU/EEA, or **GBP** for the UK — e.g. €49.99 → `4999`, £49.99 → `4999`. Keep the submitted amount consistent with the price shown to the customer in your store. Amount and `currencyCode` formatting follow the *Critical Field Constraints* table above.
 - **PSD2 / SCA (3-D Secure).** Strong Customer Authentication is a regulatory requirement in the EU/EEA. With Checkout, **3-D Secure authentication is handled automatically by the Checkout platform** — you do not orchestrate the 3DS flow yourself. To support this (and address verification / AVS), **pass complete billing address details** on the consumer in the checkout intent (`consumer.billingAddress`: `recipientFullName`, `line1`, `city`, `state`/region, `country`, `postalCode`). Missing or partial billing address data can cause SCA challenges or AVS checks to fail.
 - **Country code.** The billing address `country` must be a valid **ISO 3166-1 alpha-2 code** (e.g. `FR`, `DE`, `NL` — not `France`/`Germany`). Any free-text country input in your checkout UI must be **replaced with a structured selector that returns the alpha-2 code** before production deployment; free-text country entry is not acceptable for EMEA go-live.
-
-## Payment Methods
-
-- [Payment methods](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fcapabilities%2Fcheckout%2Fpayment-methods.md) Discover the wide range of payment methods that the J.P. Morgan Checkout API supports on the Payments Developer Portal.
-
-## EU Local Payment Methods
-
-- [EU local payment methods](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fcapabilities%2Fcheckout%2Feu-local-payment-methods.md) Discover the wide range of EU local payment methods that the J.P. Morgan Checkout API supports on the Payments Developer Portal.
 
 ## Drop-in UI
 

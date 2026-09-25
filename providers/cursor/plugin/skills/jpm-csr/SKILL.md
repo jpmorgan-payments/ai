@@ -31,7 +31,7 @@ Ask:
   - "PROD only"
   - "Both — CAT and PROD"
 
-JPM requires a **separate CSR per environment** with a **different CN**. If the user picks "Both", you'll run the generation twice with different CNs but otherwise identical subject fields.
+JPM requires a **separate CSR per environment** with a **different CN**. If the user picks "Both", you'll run the generation twice, collecting the subject fields a second time as described in Step 3.
 
 ## Step 3 — Collect subject fields
 
