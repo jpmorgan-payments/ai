@@ -1,0 +1,53 @@
+# JPM In-Store (semi-integrated) configuration — Android / Gradle
+#
+# Android projects do NOT use .env files. Store these values in the project's
+# `local.properties` (already gitignored by default in a standard Android
+# project) and surface them to app code as BuildConfig fields.
+#
+# Add the `jpm.*` keys below to your existing `local.properties`, fill in the
+# values from your onboarding artifacts, and do NOT commit real values.
+
+# --- Terminal connection ---------------------------------------------------
+# The terminal exposes a TLS WebSocket the POS connects to.
+# This skill's default semi-integrated WebSocket port is 8442. Use the terminal's LAN IP.
+#   wss://<terminal-ip>:8442
+jpm.terminal.host=
+jpm.terminal.port=8442
+
+# --- Mandatory terminal identifier -----------------------------------------
+# HWVENDORID is assigned by J.P. Morgan and MUST be set at startup via the
+# SetParameter operation BEFORE any transaction. Placeholder only — fill from
+# your onboarding artifacts. Do not commit the real value.
+jpm.hwvendorid=
+
+# --- Environment -----------------------------------------------------------
+# CAT = Customer Acceptance Testing (JPM test environment). PROD = production.
+# Go-live to PROD is gated by JPM validation.
+jpm.env=CAT
+
+# ---------------------------------------------------------------------------
+# Wiring into BuildConfig (build.gradle.kts) — read the keys at build time and
+# expose them so no host/identifier is hardcoded in source:
+#
+#   import java.util.Properties
+#
+#   val localProps = Properties().apply {
+#       val f = rootProject.file("local.properties")
+#       if (f.exists()) f.inputStream().use { load(it) }
+#   }
+#
+#   android {
+#       buildFeatures { buildConfig = true }
+#       defaultConfig {
+#           buildConfigField("String", "JPM_TERMINAL_HOST",
+#               "\"${localProps.getProperty("jpm.terminal.host", "")}\"")
+#           buildConfigField("String", "JPM_TERMINAL_PORT",
+#               "\"${localProps.getProperty("jpm.terminal.port", "8442")}\"")
+#           buildConfigField("String", "JPM_HWVENDORID",
+#               "\"${localProps.getProperty("jpm.hwvendorid", "")}\"")
+#           buildConfigField("String", "JPM_ENV",
+#               "\"${localProps.getProperty("jpm.env", "CAT")}\"")
+#       }
+#   }
+#
+# Then read them in app code via BuildConfig.JPM_TERMINAL_HOST, etc.
