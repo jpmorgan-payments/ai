@@ -1,0 +1,133 @@
+[project]
+name = "jpmc.mcp_for_api_documentation"
+version = "0.0.1"
+description = "A JPMorgan Chase (JPMC) Model Context Protocol (MCP) server for Payments API Documentation"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # HTML processing
+    "beautifulsoup4>=4.12.0",
+    "markdownify>=1.1.0",
+
+    # MCP framework
+    "mcp[cli]>=1.11.0",
+    "pydantic>=2.10.6",
+
+    # HTTP and utilities
+    "httpx>=0.27.0",
+    "loguru>=0.7.0",
+]
+license = {text = "Apache-2.0"}
+license-files = ["LICENSE", "NOTICE"]
+
+authors = [
+    {name = "JPMorgan Payments API DocTeam"},
+    {name = "JPMC API Doc MCP", email = "jpmc-pdp-mcp@users.noreply.github.com"},
+]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+[project.scripts]
+"jpmc.mcp_for_api_documentation" = "jpmc.mcp_for_api_documentation.server:main"
+
+[project.urls]
+Homepage = "https://developer.payments.jpmorgan.com/"
+Documentation = "https://developer.payments.jpmorgan.com/docs"
+Source = ""
+"Bug Tracker" = ""
+Changelog = ""
+
+[dependency-groups]
+dev = [
+    # Development tools
+    "commitizen>=4.2.2",
+    "pre-commit>=4.1.0",
+    "ruff>=0.9.7",
+    "pyright>=1.1.398",
+
+    # Testing frameworks
+    "pytest>=9.0.3",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.1",
+    "pytest-asyncio>=0.26.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.ruff]
+line-length = 99
+extend-include = ["*.ipynb"]
+exclude = [
+    ".venv",
+    "**/__pycache__",
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/env",
+    "**/.ruff_cache",
+    "**/.venv",
+    "**/.ipynb_checkpoints"
+]
+force-exclude = true
+
+[tool.ruff.lint]
+exclude = ["__init__.py"]
+select = ["C", "D", "E", "F", "I", "W"]
+ignore = ["C901", "E501", "E741", "F402", "F823", "D100", "D106"]
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
+no-sections = true
+
+[tool.ruff.lint.per-file-ignores]
+"**/*.ipynb" = ["F704"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.0.1"
+tag_format = "v$version"
+version_files = [
+    "pyproject.toml:version",
+    "jpmc/mcp_for_api_documentation/__init__.py:__version__"
+]
+update_changelog_on_bump = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["jpmc"]
+
+[tool.pytest.ini_options]
+markers = [
+    "live: marks tests that make live API calls (deselect with '-m \"not live\"')",
+    "asyncio: marks tests that use asyncio"
+]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.bandit]
+exclude_dirs = ["venv", "tests"]
+
+[tool.coverage.run]
+source = ["jpmc"]

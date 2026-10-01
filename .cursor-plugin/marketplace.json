@@ -1,0 +1,17 @@
+{
+  "name": "jpm-payments",
+  "owner": {
+    "name": "J.P. Morgan Payments"
+  },
+  "plugins": [
+    {
+      "name": "jpm-payments-skills",
+      "source": "./providers/cursor/plugin/",
+      "description": "J.P. Morgan Payments — All Skills",
+      "version": "2.1.0",
+      "author": {
+        "name": "J.P. Morgan Payments"
+      }
+    }
+  ]
+}
