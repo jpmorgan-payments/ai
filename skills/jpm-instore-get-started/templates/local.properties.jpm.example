@@ -9,7 +9,7 @@
 
 # --- Terminal connection ---------------------------------------------------
 # The terminal exposes a TLS WebSocket the POS connects to.
-# Real terminal listening port is 8442. Use the terminal's LAN IP.
+# This skill's default semi-integrated WebSocket port is 8442. Use the terminal's LAN IP.
 #   wss://<terminal-ip>:8442
 jpm.terminal.host=
 jpm.terminal.port=8442

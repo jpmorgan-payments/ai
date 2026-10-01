@@ -7,7 +7,7 @@ The Payment Terminal Application is **pre-certified and provisioned by J.P. Morg
 | Artifact | Purpose | Where it's used |
 |---|---|---|
 | **HWVENDORID** | Mandatory identifier assigned by J.P. Morgan | Set at startup via `SetParameter` as the **first POS-sent terminal operation** after readiness. Stored in your config file as `JPM_HWVENDORID` (`instore.env`) or `jpm.hwvendorid` (`local.properties`, Android). |
-| **TLS certificate / trust material** | Lets the POS trust the terminal's `wss://` endpoint | POS WebSocket client configuration. |
+| **POS client certificate / private key and terminal trust material** | Provides mutual authentication: the terminal authenticates the POS client, and the POS trusts the terminal's `wss://` certificate | POS WebSocket client configuration or platform keystore. |
 | **Supported terminal(s)** | The physical AXIUM device(s) | Card interaction happens here — never on the POS. |
 | **Pre-configured test terminals** | Safe protocol testing before production | Proves send/receive, operation sequencing, and broken-connection behavior. Official validation still happens on real hardware. |
 | **EMV test cards** | Required test inputs for card-present validation | Used with the official test scripts and amount/response scenarios. |
@@ -38,6 +38,8 @@ See `terminals-and-operations.md` for the shared terminal and operation catalogu
 
 LLM-friendly (markdown) source pages on the J.P. Morgan Payments Developer Portal:
 
+Agents must use these endpoints instead of the rendered `/docs/` pages.
+
 - [Payment terminals overview (countertop / mobile / portable)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminals-overview.md)
 - [Payment Terminal Application overview](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Foverview-payment-terminal-app.md)
-- [Configuration parameters (`HWVENDORID`)](https://developer.payments.jpmorgan.com/docs/commerce/in-store-payments/capabilities/payment-terminal-application/configuration-parameters)
+- [Configuration parameters (`HWVENDORID`)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fconfiguration-parameters.md)

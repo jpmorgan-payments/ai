@@ -7,11 +7,9 @@ description: Conversational intake for merchants building or migrating an in-sto
 
 Run a conversational intake for merchants getting started with an **in-store (card-present)** integration against the J.P. Morgan Payments Terminal Application. The primary v1 model is **semi-integrated**: the POS and the terminal are separate, and the POS sends payment requests to the terminal over a local **TLS WebSocket** (`wss://`) while all card interaction stays on the pre-certified terminal.
 
-For the official onboarding and provisioning guide, see [Getting started](https://developer.payments.jpmorgan.com/docs/commerce/in-store-payments/2getstarted-instorepay).
+For the official product guide, use the LLM-friendly [In-Store Payments overview](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2F1overview-instorepay.md).
 
 Follow the steps in order. Use `AskUserQuestion` for every multiple-choice question.
-
-> **New to card-present payments?** Read `references/glossary.md` first — it defines every term used below (semi-integrated, HWVENDORID, WebSocket/WSS, SAF, DCC, settlement, CAT) using the "Ultimate LLC" narrative as an on-ramp.
 
 ## Disclaimer (show before Step 1)
 
@@ -30,14 +28,14 @@ If **No**, exit this skill.
 
 ## Step 1 — Triage intent
 
-Before asking any intake questions, inspect the current working directory recursively for existing source files. Ignore dependency, generated, and version-control directories: `.git`, `.gradle`, `.idea`, `.next`, `node_modules`, `build`, `dist`, `target`, `vendor`, `bin`, and `obj`.
+Ask:
+- Question: "What are you trying to do with J.P. Morgan In-Store Payments?"
+- Header: "Goal"
+- Options:
+  - "Migrate an existing POS integration" — add J.P. Morgan payments to an existing POS or move from another provider
+  - "Start a new POS integration" — build a new integration from scratch
 
-Treat files with these extensions as source files: `.c`, `.cc`, `.cpp`, `.cs`, `.fs`, `.go`, `.java`, `.js`, `.jsx`, `.kt`, `.kts`, `.php`, `.py`, `.rb`, `.rs`, `.swift`, `.ts`, and `.tsx`.
-
-- If one or more source files are found, set `intent = migrate an existing POS` and tell the user: "Existing project source was detected, so this intake will treat the integration as a migration."
-- If no source files are found, set `intent = start a new in-store integration` and tell the user: "No existing project source was detected, so this intake will treat the integration as a greenfield build."
-
-Do not ask the user to choose the intent.
+Remember the answer as `intent`.
 
 ## Step 2 — Integration model
 
@@ -68,10 +66,10 @@ Remember as `model`.
 
 ## Step 3 — Onboarded?
 
-The terminal is provisioned by J.P. Morgan. To run transactions and complete validation you need: your **HWVENDORID** (a mandatory identifier set at startup via `SetParameter`), the **TLS certificate/trust material** for the WebSocket connection, pre-configured test terminal(s), required EMV test cards, and your assigned **validation artifacts** (go-live worksheet and validation contact).
+The terminal is provisioned by J.P. Morgan. To run transactions and complete validation you need: your **HWVENDORID** (a mandatory identifier set at startup via `SetParameter`), the **POS client certificate and private key plus terminal trust material** for the mutual TLS WebSocket connection, pre-configured test terminal(s), required EMV test cards, and your assigned **validation artifacts** (go-live worksheet and validation contact).
 
 Ask:
-- Question: "Have you completed JPM in-store onboarding and received your HWVENDORID, certificate/trust material, test terminal access, EMV test cards, validation worksheet, and validation contact?"
+- Question: "Have you completed JPM in-store onboarding and received your HWVENDORID, POS client certificate/key, terminal trust material, test terminal access, EMV test cards, validation worksheet, and validation contact?"
 - Header: "Onboarded?"
 - Options:
   - "Yes — I have what I need"
@@ -84,7 +82,7 @@ If **No**, go to Step 8. If **Yes**, go to Step 4.
 The POS reaches the terminal over the local network on **port 8442** (`wss://<terminal-ip>:8442`). Walk the developer through `references/network-checklist.md` and capture the answers. Ask (free text is fine for each; group them):
 
 1. **Terminal IP addressing** — is the terminal on a static IP or DHCP reservation on the same LAN/VLAN as the POS?
-2. **Port & TLS certificate** — is TCP **port 8442** open between the POS and terminal (firewall allows it, not blocked or remapped), and does the POS trust the terminal's certificate (or the provided TLS trust material) for the `wss://` (TLS 1.2) connection?
+2. **Port & mutual TLS** — is TCP **port 8442** open between the POS and terminal (firewall allows it, not blocked or remapped), is the POS configured to present its client certificate/private key, and does it trust the terminal certificate for the `wss://` (TLS 1.2) connection?
 
 Summarize the captured values back to the user (mask nothing here except never echo private keys). Flag any answer that would block connectivity and point to `references/network-checklist.md` for remediation.
 
@@ -185,7 +183,7 @@ The intake is complete. Ask where the user wants to go next:
 
 Tell the user:
 
-> In-store onboarding and terminal provisioning are handled by your J.P. Morgan implementation contact / Relationship Manager (RM). Please reach out to them to begin onboarding and to receive your **HWVENDORID**, the **TLS certificate/trust material**, your **supported AXIUM terminal(s)**, and the **validation worksheet** that gates go-live. Once you have them, run this skill again.
+> In-store onboarding and terminal provisioning are handled by your J.P. Morgan implementation contact / Relationship Manager (RM). Please reach out to them to begin onboarding and to receive your **HWVENDORID**, the **POS client certificate/private key and terminal trust material**, your **supported AXIUM terminal(s)**, and the **validation worksheet** that gates go-live. Once you have them, run this skill again.
 > You should also confirm test terminal access, required EMV test cards, network readiness, and your assigned validation contact before starting implementation.
 
 Then exit.

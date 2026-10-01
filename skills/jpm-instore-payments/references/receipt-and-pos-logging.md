@@ -30,10 +30,3 @@ Never log full PAN, PIN, CVV, track data, private keys, certificate PEM bodies, 
 ## Validation evidence
 
 For formal validation, keep PCI-safe evidence for the flows under test: test terminal/CAT run logs, receipt samples, approval and decline/error paths, paired reversible operations, AVS/CVD scenarios where used, official test amount scenarios, and broken-connection recovery using `LastTransaction`.
-
-## References
-
-- [Receipt requirements](https://developer.payments.jpmorgan.com/docs/commerce/in-store-payments/capabilities/payment-terminal-application/receipts)
-- [Maintain a POS log](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fpos-logging.md)
-- [Dynamic Currency Conversion receipt requirements](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fdynamic-currency-conversion.md)
-- [Testing](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2F6testing-instorepay.md)

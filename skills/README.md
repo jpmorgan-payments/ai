@@ -14,7 +14,9 @@ These skills rely on AI agents to produce code, and **all generated code must be
 
 ## What's Inside
 
-This repository ships a set of Agent Skills. Some chain together to take you from onboarding through your first integration, while others stand on their own: **`jpm-csr`** is a standalone onboarding helper (generate a CSR), and **`jpm-notifications`** is a companion to `jpm-merchant-integrations` for receiving inbound webhook events.
+This repository ships a set of Agent Skills. Some chain together to take you from onboarding through your first integration, while others stand on their own: **`jpm-csr`** is a standalone onboarding helper (generate a CSR), and **`jpm-notifications`** is a companion to `jpm-merchant-integrations` for receiving inbound webhook events. It also includes a separate in-store track for card-present POS integrations.
+
+### Online integrations
 
 | Skill | Path | Purpose |
 | ----- | ---- | ------- |
@@ -23,6 +25,13 @@ This repository ships a set of Agent Skills. Some chain together to take you fro
 | `jpm-merchant-integrations` | [`skills/jpm-merchant-integrations/`](skills/jpm-merchant-integrations/SKILL.md) | Walks you through one API integration at a time — Checkout or Online Payments — and helps you expand by adding new APIs over time |
 | `jpm-csr` | [`skills/jpm-csr/`](skills/jpm-csr/SKILL.md) | **Standalone onboarding helper** (independent of the chain above) — generates a Certificate Signing Request (CSR) + private key to send to your J.P. Morgan Relationship Manager for client ID provisioning. Run it before onboarding if you don't yet have credentials |
 | `jpm-notifications` | [`skills/jpm-notifications/`](skills/jpm-notifications/SKILL.md) | **Companion** to `jpm-merchant-integrations` — receive and verify inbound JPM webhook events (signature verification, optional mTLS, de-duplication) instead of polling. Assumes auth is already set up via `jpm-oauth` |
+
+### In-store integrations
+
+| Skill | Path | Purpose |
+| ----- | ---- | ------- |
+| `jpm-instore-get-started` | [`skills/jpm-instore-get-started/`](skills/jpm-instore-get-started/SKILL.md) | Conversational intake for a card-present integration against the J.P. Morgan Payments Terminal Application on Ingenico AXIUM terminals — triages new build vs. migration, runs a network questionnaire, and sets up an `instore.env` |
+| `jpm-instore-payments` | [`skills/jpm-instore-payments/`](skills/jpm-instore-payments/SKILL.md) | Implements the semi-integrated terminal integration one operation at a time — setup/management, certificate operations, and payment operations such as sale, refund, void, gift cards, SAF, DCC, and settlement |
 
 Each skill folder is composed of three layers:
 
@@ -41,6 +50,7 @@ Each skill folder is composed of three layers:
 | **Tokenization** | `skills/jpm-merchant-integrations/references/tokenization.md` | Swap a card PAN for a merchant-scoped token to reduce PCI scope and store tokens instead of card data |
 | **3-D Secure (Standalone)** | `skills/jpm-merchant-integrations/references/3d-secure.md` | Standalone 3DS authentication (use the inline `threeDS` field in Online Payments when bundling with an auth) |
 | **Account Updater** | `skills/jpm-merchant-integrations/references/account-updater.md` | Keep stored cards current as issuers reissue them — inquiry mode (sync) or card-registration mode (async, via `jpm-notifications`) |
+| **In-Store (semi-integrated terminal)** | `skills/jpm-instore-payments/references/official-protocol-reference.md` | Semi-integrated WebSocket protocol, terminal operations, transaction types, result codes, SAF / DCC / settlement, certificate operations |
 
 More APIs (Reporting and others) are planned for future releases.
 
@@ -155,7 +165,9 @@ Open your project in VS Code or a JetBrains IDE with GitHub Copilot Chat enabled
 
 ## Usage
 
-### Full walkthrough (recommended)
+### Online integrations
+
+#### Full walkthrough (recommended)
 
 Start with the first skill — it hands off automatically through the full sequence:
 
@@ -165,7 +177,7 @@ Start with the first skill — it hands off automatically through the full seque
 
 `jpm-integrations-get-started` → `jpm-oauth` → `jpm-merchant-integrations`
 
-### Individual skills
+#### Individual skills
 
 | Goal | Slash command |
 | ---- | ------------- |
@@ -174,6 +186,24 @@ Start with the first skill — it hands off automatically through the full seque
 | Generate OAuth module | `/jpm-oauth` |
 | Integrate Checkout or Online Payments | `/jpm-merchant-integrations` |
 | Receive & verify webhook events | `/jpm-notifications` |
+
+### In-store integrations
+
+#### Prerequisites
+
+Before using the in-store skills, you need:
+
+- A supported Ingenico AXIUM terminal for the semi-integrated model: `RX7000`, `RX5000`, `DX4000`, or `DX8000`.
+- A J.P. Morgan test configuration, including an approved test terminal, TLS certificate/trust material, test `HWVENDORID`, required EMV test cards, validation worksheet, and implementation contact.
+- Network connectivity between the POS and terminal: a stable terminal IP address, an approved network path, TCP port `8442`, and no TLS interception.
+- A POS application with TLS 1.2 WebSocket support and a way to trust the terminal certificate.
+
+#### Individual skills
+
+| Goal | Slash command |
+| ---- | ------------- |
+| Prepare an existing POS application for semi-integrated terminal integration | `/jpm-instore-get-started` |
+| Implement and test a semi-integrated terminal operation | `/jpm-instore-payments` |
 
 > Each skill checks its own prerequisites and will tell you what to run first if anything is missing.
 
@@ -188,10 +218,14 @@ Start with the first skill — it hands off automatically through the full seque
 │   └── marketplace.json
 ├── .github/
 │   └── workflows/                    # daily GitHub traffic-metrics collection
-├── skills/                           
+├── skills/                           # the agent skills
 │   ├── jpm-integrations-get-started/
 │   ├── jpm-oauth/
-│   └── jpm-merchant-integrations/
+│   ├── jpm-merchant-integrations/
+│   ├── jpm-csr/
+│   ├── jpm-notifications/
+│   ├── jpm-instore-get-started/
+│   └── jpm-instore-payments/
 ├── LICENSE
 └── README.md
 ```

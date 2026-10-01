@@ -3,7 +3,8 @@
 Exact request/response shapes per operation, transcribed from the J.P. Morgan Payments
 Developer Portal. All amounts are **cents** (also known as minor units; numeric strings, two implied decimals).
 The full field/result-code/status model and parameter keys are documented in the
-official protocol reference and the configuration parameters reference. Source pages: References section below.
+official protocol reference and the configuration parameters reference. Canonical
+LLM-friendly source links are centralized in `pdp-source-pages.md`.
 
 **First, once per session — set the hardware vendor ID (mandatory):**
 ```json
@@ -15,32 +16,6 @@ this `SetParameter` request as the **first POS-sent terminal operation**. Do not
 `GetInformation`, `Display`, `ReadCard`, or `Transaction` before it. Responses **echo
 the request `operation`**; `result` is a numeric string; a transaction's financial
 outcome is in `approval`.
-
----
-
-## Contents
-
-- [1. Sale](#1-sale)
-- [2. Sale with tip](#2-sale-with-tip)
-- [3. Authorization → Completion](#3-authorization--completion)
-- [4. Force sale (voice authorization)](#4-force-sale-voice-authorization)
-- [5. Refund](#5-refund)
-- [6. Void](#6-void)
-- [7. MOTO sale](#7-moto-sale)
-- [8. Status check / balance inquiry](#8-status-check--balance-inquiry)
-- [9. Gift cards](#9-gift-cards)
-- [10. Line items (basket display)](#10-line-items-basket-display)
-- [11. Display a message](#11-display-a-message)
-- [12. Capture a signature](#12-capture-a-signature)
-- [13. Read a card (banking or non-PCI)](#13-read-a-card-banking-or-non-pci)
-- [14. Print](#14-print)
-- [15. Settlement & batch queries](#15-settlement--batch-queries)
-- [16. Cancel an in-flight operation](#16-cancel-an-in-flight-operation)
-- [17. Recovery (never blindly retry)](#17-recovery-never-blindly-retry)
-- [18. Terminal identity / health](#18-terminal-identity--health)
-- [19. Restart terminal app](#19-restart-terminal-app)
-- [20. Certificate handling](#20-certificate-handling)
-- [References](#references)
 
 ---
 
@@ -336,19 +311,3 @@ Returns `csr` as PEM text for signing by the configured CA.
 
 Encode newline and carriage-return characters in certificate strings as `\u000A` /
 `\u000D` or escaped `\\n` / `\\r` when sending JSON.
-
----
-
-## References
-
-LLM-friendly (markdown) source pages on the J.P. Morgan Payments Developer Portal.
-Full field/result-code model: see the official protocol reference.
-
-- [Card transactions (SALE, AUTH, COMPLETION, FORCE_SALE, MOTO, REFUND, STATUS_CHECK, VOID, BALANCE_INQUIRY)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fcard-transactions.md)
-- [Gift card transactions](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fgiftcard-transactions.md)
-- [Setup and management (LineItems, Display, GetSignature, ReadCard, GetTransactions, LastTransaction, PrintText, Cancel, GetInformation, Restart)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fsetup-and-management.md)
-- [Certificate handling](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fcertificate-handling.md)
-- [Settlement](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fsettlement.md)
-- [Store and Forward (ALL_SAF query)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fstore-and-forward.md)
-- [Dynamic Currency Conversion (refund `dccOriginalCurrency`)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fdynamic-currency-conversion.md)
-- [Status messages](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fstatus-messages.md)

@@ -4,8 +4,8 @@
 code. Every fact here is transcribed from the J.P. Morgan Payments Developer Portal
 *In-Store Payments → Payment Terminal Application* documentation. The shared terminal
 and operation catalogue lives in
-`../../jpm-instore-get-started/references/terminals-and-operations.md`. Source pages
-are linked in the References section at the end.
+`../../jpm-instore-get-started/references/terminals-and-operations.md`. Canonical
+LLM-friendly source links are centralized in `pdp-source-pages.md`.
 
 > This is the **public POS contract** for the J.P. Morgan Payment Terminal
 > Application (the Android card-present app that runs on the terminal). It is what an

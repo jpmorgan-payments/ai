@@ -16,13 +16,6 @@ All monetary amounts are **cents** (integer/numeric string): `$5.00` = `500`.
 
 > **The envelope contract is language-agnostic.** The Node.js and Kotlin/Android snippets below are worked examples. Generate your client in the language chosen in the skill (`language`), keeping the same operations, field names, match rules, and cents amounts. Any WebSocket library works.
 
-## Contents
-
-- [Node.js (`ws`)](#nodejs-ws)
-- [Kotlin / Android (real terminal shape)](#kotlin--android-real-terminal-shape)
-- [Envelope quick reference](#envelope-quick-reference)
-- [References](#references)
-
 ## Node.js (`ws`)
 
 ```bash
@@ -237,14 +230,3 @@ Do all socket I/O off the UI thread and keep the UI responsive.
 
 > Field names mirror the public terminal contract: amounts as `requestedAmount` (cents), `printReceipt` `"0"`/`"1"`, optional `reference` (≤12), `tipAmount`, `invoice` (≤6); `originalAuthCode` links VOID/COMPLETION. Responses echo the request `operation`; a transaction's outcome is in `approval`; `result` is a numeric string. See the official protocol reference and the official transaction recipes for the full field and operation catalogue.
 > For `ReadCard`, use `cardType:"1"` for banking-card buffering. `cardType:"0"` returns cleartext non-banking track data (gift/employee cards) and must not be generated for payment-card capture.
-
----
-
-## References
-
-LLM-friendly (markdown) source pages on the J.P. Morgan Payments Developer Portal:
-
-- [Core concepts (WebSocket connectivity, message format, security)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2F3coreconcepts-instorepay.md)
-- [Setup and management (operations reference)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fsetup-and-management.md)
-- [Card transactions (transaction envelopes + responses)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fcard-transactions.md)
-- [Certificate handling (mTLS)](https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fin-store-payments%2Fcapabilities%2Fpayment-terminal-application%2Fcertificate-handling.md)

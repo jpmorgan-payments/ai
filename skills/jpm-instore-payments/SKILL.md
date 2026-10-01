@@ -13,7 +13,7 @@ Implement the in-store integration **one operation at a time** against the semi-
 > **Receipts/logging:** `references/receipt-and-pos-logging.md`.
 > **Client scaffold:** `references/websocket-client.md` (match envelopes to the official reference).
 > **Result codes & recovery:** `references/result-codes.md`.
-> **Terms:** `jpm-instore-get-started/references/glossary.md`.
+> **PDP sources:** `references/pdp-source-pages.md` (canonical LLM-friendly links; load when verifying or refreshing local reference material).
 
 ## Step 1 — Confirm prerequisites
 
