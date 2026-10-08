@@ -120,7 +120,7 @@ public final class JpmAuth {
         .compact();
   }
 
-  // Assumes a PKCS#8 PEM. If the key starts with "-----BEGIN RSA PRIVATE KEY-----" (PKCS#1),
+  // Assumes a PKCS#8 PEM. If the key is PKCS#1,
   // convert with: openssl pkcs8 -topk8 -in key.pem -out key-pkcs8.pem -nocrypt
   private static PrivateKey loadPrivateKey(String path) throws Exception {
     String pem = Files.readString(Path.of(path))
