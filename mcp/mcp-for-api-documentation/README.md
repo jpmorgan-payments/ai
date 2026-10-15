@@ -104,7 +104,7 @@ source .venv/bin/activate
 
 **Install dependencies**:
 ```bash
-pip install "markdownify>=1.1.0" "mcp[cli]>=1.11.0" "pydantic>=2.10.6" "httpx>=0.27.0" "loguru>=0.7.0" "beautifulsoup4>=4.12.0"
+pip install "markdownify>=1.1.0" "mcp[cli]>=1.11.0,<2" "pydantic>=2.10.6" "httpx>=0.27.0" "loguru>=0.7.0" "beautifulsoup4>=4.12.0"
 ```
 
 **Run server**:
