@@ -218,6 +218,17 @@ async def search_documentation(
 async def read_documentation(
     ctx: Context,
     url: str = Field(description='URL of the JPMC documentation page to read'),
+    max_length: int = Field(
+        default=5000,
+        description='Maximum number of characters to return',
+        gt=0,
+        lt=1000000,
+    ),
+    start_index: int = Field(
+        default=0,
+        description='Character offset to start reading from, for paginating long pages',
+        ge=0,
+    ),
 ) -> str:
     """Fetch and convert a JPMC Payments API documentation page to markdown format.
 
@@ -246,6 +257,8 @@ async def read_documentation(
     Args:
         ctx: MCP context for logging and error handling
         url: URL of the JPMC PDP documentation page to read
+        max_length: Maximum number of characters to return
+        start_index: Character offset to start reading from
 
     Returns:
         Markdown content of the JPMC-PDP documentation
@@ -258,7 +271,7 @@ async def read_documentation(
         await ctx.error(str(e))
         raise ValueError(str(e)) from e
 
-    return await read_documentation_impl(ctx, url_str, 5000, 0, SESSION_UUID)
+    return await read_documentation_impl(ctx, url_str, max_length, start_index, SESSION_UUID)
 
 
 @mcp.tool()
