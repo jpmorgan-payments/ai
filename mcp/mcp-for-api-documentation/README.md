@@ -199,8 +199,10 @@ Fetch and convert a specific PDP documentation page to markdown format.
 **Function Signature:**
 ```python
 read_documentation(
-    url: str            # URL of the documentation page to read
-) -> str                # Returns markdown-formatted content
+    url: str,                # URL of the documentation page to read
+    max_length: int = 5000,  # Maximum characters to return (1-999999, default: 5000)
+    start_index: int = 0     # Character offset to start reading from (default: 0)
+) -> str                     # Returns markdown-formatted content
 ```
 
 **Example Usage:**
