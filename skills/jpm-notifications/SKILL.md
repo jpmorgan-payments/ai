@@ -48,6 +48,7 @@ Ask which event families the merchant cares about (free text). JPM organizes eve
 - **`tokenLifecycleNotification`** (Tokenization) — `CardDetailsUpdate`, `TokenStateChange`, `TokenProvisionUpdate`, `BulkTokenUpdate`
 - **`accountUpdateNotification`** (Account Updater) — `AccountUpdaterStatus` (plus Pay-by-Bank subtypes)
 - **`consumerProfileNotification`** — `Created`, `PaymentMethodCreated`, `PaymentMethodDeleted`, `BulkConsumerProfileUpdateNotification`
+- **`reportStatusNotification`** (Reporting) — `DailyCompleted` and related report-run status subtypes; use it so scheduled report runs don't have to be polled
 - **`recurringProgramNotification`** — `PlanUpdated`, `PaymentApplied`, `PaymentNotApplied`, etc.
 - **`entityOnboardingNotification`**, **`merchantStatusNotification`**, **`payoutNotification`** (onboarding + payouts)
 
@@ -81,7 +82,7 @@ The full smoke test recipe lives in `references/webhooks.md` under "CAT smoke te
 
 ## Step 5 — Offer to add another
 
-Once one event family is flowing in CAT, ask if the merchant wants to wire additional families or move on to integrating an API that produces them — Online Payments, Tokenization, Account Updater, or Consumer Profile Management — via `jpm-merchant-integrations`. (Note: Disputes does not publish events through this API; dispute state is polled via the Disputes endpoints.)
+Once one event family is flowing in CAT, ask if the merchant wants to wire additional families or move on to integrating an API that produces them — Online Payments, Tokenization, Account Updater, Reporting, or Consumer Profile Management — via `jpm-merchant-integrations`. (Note: Disputes does not publish events through this API; dispute state is polled via the Disputes endpoints.)
 
 ## Rules
 

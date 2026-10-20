@@ -8,7 +8,7 @@ A set of [Agent Skills](https://agentskills.io/) that give GitHub Copilot, Claud
 
 These skills rely on AI agents to produce code, and **all generated code must be reviewed and verified by a qualified engineer before being deployed to production**. AI-generated code can contain subtle correctness, security, or compliance defects.
 
-> **Early access.** Account Updater, Tokenization, 3-D Secure, and `jpm-notifications` are early access — expect to do additional testing and validation before relying on them.
+> **Early access.** Account Updater, Tokenization, 3-D Secure, Reporting, and `jpm-notifications` are early access — expect to do additional testing and validation before relying on them.
 
 ---
 
@@ -20,7 +20,7 @@ This repository ships a set of Agent Skills. Some chain together to take you fro
 | ----- | ---- | ------- |
 | `jpm-integrations-get-started` | [`skills/jpm-integrations-get-started/`](skills/jpm-integrations-get-started/SKILL.md) | Get started with J.P. Morgan Payments — disclaimer acknowledgment, goal triage, credential check, and `.env` setup |
 | `jpm-oauth` | [`skills/jpm-oauth/`](skills/jpm-oauth/SKILL.md) | Generates a working OAuth (JWT signing + IDAnywhere token exchange) module in your project, with token caching baked in |
-| `jpm-merchant-integrations` | [`skills/jpm-merchant-integrations/`](skills/jpm-merchant-integrations/SKILL.md) | Walks you through one API integration at a time — Checkout or Online Payments — and helps you expand by adding new APIs over time |
+| `jpm-merchant-integrations` | [`skills/jpm-merchant-integrations/`](skills/jpm-merchant-integrations/SKILL.md) | Walks you through one API integration at a time — Checkout, Online Payments, Tokenization, 3-D Secure, Account Updater, or Reporting — and helps you expand by adding new APIs over time |
 | `jpm-csr` | [`skills/jpm-csr/`](skills/jpm-csr/SKILL.md) | **Standalone onboarding helper** (independent of the chain above) — generates a private key and Certificate Signing Request (CSR). Provide the CSR to your J.P. Morgan Relationship Manager for client ID provisioning. Run it before onboarding if you don't yet have credentials |
 | `jpm-notifications` | [`skills/jpm-notifications/`](skills/jpm-notifications/SKILL.md) | **Companion** to `jpm-merchant-integrations` — receive and verify inbound JPM webhook events (signature verification, optional mTLS, de-duplication) instead of polling. Assumes auth is already set up via `jpm-oauth` |
 
@@ -41,8 +41,9 @@ Each skill folder is composed of three layers:
 | **Tokenization** | `skills/jpm-merchant-integrations/references/tokenization.md` | Swap a card PAN for a merchant-scoped token to reduce PCI scope and store tokens instead of card data |
 | **3-D Secure (Standalone)** | `skills/jpm-merchant-integrations/references/3d-secure.md` | Standalone 3DS authentication (use the inline `threeDS` field in Online Payments when bundling with an auth) |
 | **Account Updater** | `skills/jpm-merchant-integrations/references/account-updater.md` | Keep stored cards current as issuers reissue them — inquiry mode (sync) or card-registration mode (async, via `jpm-notifications`) |
+| **Reporting** | `skills/jpm-merchant-integrations/references/reporting.md` | Configure, schedule, and download reports across the payment lifecycle — preset reports (quick integration) or custom field/filter/schedule selection, plus report configs and reporting groups |
 
-More APIs (Reporting and others) are planned for future releases.
+More APIs are planned for future releases.
 
 ---
 
@@ -172,7 +173,7 @@ Start with the first skill — it hands off automatically through the full seque
 | Generate a CSR + private key for onboarding | `/jpm-csr` |
 | Onboarding & `.env` setup | `/jpm-integrations-get-started` |
 | Generate OAuth module | `/jpm-oauth` |
-| Integrate Checkout or Online Payments | `/jpm-merchant-integrations` |
+| Integrate an API (Checkout, Online Payments, Tokenization, 3-D Secure, Account Updater, Reporting) | `/jpm-merchant-integrations` |
 | Receive & verify webhook events | `/jpm-notifications` |
 
 > Each skill checks its own prerequisites and will tell you what to run first if anything is missing.

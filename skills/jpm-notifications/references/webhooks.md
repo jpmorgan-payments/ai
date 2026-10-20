@@ -163,6 +163,7 @@ JPM's event naming convention is **camelCase notification families containing su
 | `tokenLifecycleNotification` | `All`, `CardDetailsUpdate`, `TokenStateChange`, `TokenProvisionUpdate`, `BulkTokenUpdate` | Tokenization |
 | `accountUpdateNotification` | `AccountUpdaterStatus` (plus Pay-by-Bank subtypes `AccountLinkSuccess`, `AccountLinkException`, `MicroDeposit*`) | Account Updater, Pay by Bank |
 | `consumerProfileNotification` | `All`, `Created`, `PaymentMethodCreated`, `PaymentMethodDeleted`, `BulkConsumerProfileUpdateNotification` | Consumer Profile Management |
+| `reportStatusNotification` | `DailyCompleted` (report-run status subtypes) | Reporting |
 | `entityOnboardingNotification` | (digital onboarding subtypes) | Onboarding |
 | `merchantStatusNotification` | (merchant status subtypes) | Onboarding |
 | `payoutNotification` | (payout subtypes) | Payouts |
