@@ -1,8 +1,8 @@
 ---
 name: jpm-merchant-integrations
-description: Implement J.P. Morgan Payments API integrations in a merchant project once OAuth authentication is in place. Use this skill after a merchant has completed JPM onboarding and wired up authentication (typically right after `jpm-oauth`) and is ready to integrate one of the supported APIs — Checkout, Online Payments, Tokenization, 3-D Secure, or Account Updater. For inbound webhook handling, use the companion `jpm-notifications` skill instead. Recommends implementing one API at a time, reusing the credentials and auth module already wired into the project.
+description: Implement J.P. Morgan Payments API integrations in a merchant project once OAuth authentication is in place. Use this skill after a merchant has completed JPM onboarding and wired up authentication (typically right after `jpm-oauth`) and is ready to integrate one of the supported APIs — Checkout, Online Payments, Tokenization, 3-D Secure, Account Updater, or Reporting. For inbound webhook handling, use the companion `jpm-notifications` skill instead. Recommends implementing one API at a time, reusing the credentials and auth module already wired into the project.
 metadata:
-  version: 2.0.0
+  version: 2.1.0
   lob: commerce
 ---
 
@@ -42,6 +42,7 @@ Ask:
   - "Tokenization" — swap card numbers for JPM-issued tokens to reduce PCI scope. Online (per-card) and bulk (MFTS file) modes.
   - "3-D Secure" — standalone cardholder authentication for liability shift, decoupled from authorization.
   - "Account Updater" — keep stored cards current as issuers reissue them. Inquiry mode (sync) or card-registration mode (async via webhooks).
+  - "Reporting" — configure, schedule, and download reports across the payment lifecycle (settlement, deposits, disputes, interchange, tokens). Use for reconciliation and financial reporting rather than payment processing.
 
 **If the merchant chose Account Updater, ask the mode question first — before the free-text description below.** Account Updater's two modes have different prerequisites and integration shapes, so the mode must be pinned down up front:
 - Question: "Which Account Updater mode do you want to integrate?"
@@ -52,9 +53,18 @@ Ask:
 
 Carry the chosen mode into the description prompt and Step 3. Only after the mode is selected, ask the free-text description below.
 
+**If the merchant chose Reporting, ask the integration-option question first — before the free-text description below.** Reporting's two integration options produce very different request payloads, so pin it down up front:
+- Question: "Which Reporting integration option do you want?"
+- Header: "Report setup"
+- Options:
+  - "Quick integration — run JPM's preset reports by report type ID, minimal payload"
+  - "Custom integration — pick your own fields, sort order, filters, and delivery schedule"
+
+Remember the answer as `reportingOption` and carry it into Step 3. Both options are documented in `references/reporting.md`: its Sample Requests include a quick-integration payload and custom-integration payloads (adhoc and daily).
+
 Once chosen, ask the user (free text):
 
-> "Briefly describe what you're building or migrating — e.g. 'a simple checkout page for a single product', 'migrating from Stripe Elements'. A sentence or two is enough."
+> "Briefly describe what you're building or migrating — e.g. 'a simple checkout page for a single product', 'migrating from Stripe Elements', 'nightly settlement reconciliation into our data warehouse'. A sentence or two is enough."
 
 Carry this description into Step 3 so the implementation, file structure, and code comments are tailored to the merchant's actual use case rather than a generic reference build.
 
@@ -81,18 +91,20 @@ Once chosen, read the corresponding reference file from this skill's directory:
 - Tokenization → `references/tokenization.md`
 - 3-D Secure → `references/3d-secure.md`
 - Account Updater → `references/account-updater.md`
+- Reporting → `references/reporting.md`
 
-If the user asks for an API not listed above (Wallet Decryptions, Disputes, Consumer Profile Management, Reporting, In-Store Payments, Pay by Bank, Push to Card, Global Payments, Wire, US RTP, Embedded, Verifications, etc.), tell them this skill doesn't yet cover that API and offer one of the supported APIs instead. Don't try to invent the integration from scratch.
+If the user asks for an API not listed above (Wallet Decryptions, Disputes, Consumer Profile Management, In-Store Payments, Pay by Bank, Push to Card, Global Payments, Wire, US RTP, Embedded, Verifications, etc.), tell them this skill doesn't yet cover that API and offer one of the supported APIs instead. Don't try to invent the integration from scratch.
 
 ## Step 3 — Implement the chosen API
 
-Follow the steps in the chosen reference file. If you captured a `threeDSFlow` in Step 2 (Online Payments + 3DS), implement that flow only — Orchestrated or Passthrough per the matching "Auth-Capture with … 3DS" section of `online-payments.md`, or standalone per `3d-secure.md` — rather than building all three. Cross-cutting principles that apply to all supported APIs:
+Follow the steps in the chosen reference file. If you captured a `threeDSFlow` in Step 2 (Online Payments + 3DS), implement that flow only — Orchestrated or Passthrough per the matching "Auth-Capture with … 3DS" section of `online-payments.md`, or standalone per `3d-secure.md` — rather than building all three. Likewise, if you captured a `reportingOption`, build only that option's payload shape rather than both. Cross-cutting principles that apply to all supported APIs:
 
 - **Reuse the existing auth module.** Every JPM API call needs `Authorization: Bearer <access_token>` from the merchant's `getAccessToken()`. Import that function — do not re-implement token fetching inside the integration code. The auth module already caches correctly; bypassing it is exactly the per-call-token anti-pattern `jpm-oauth` warned against.
-- **Use environment-aware base URLs.** Base URLs differ between CAT and PROD and sometimes between sub-services within an environment. Read them from env vars (e.g. `JPM_CHECKOUT_API_URL`, `JPM_ONLINE_API_URL`, `JPM_TOKENIZATION_URL`, `JPM_3DS_URL`, `JPM_ACCOUNT_UPDATER_URL`) rather than hardcoding. The reference file for each API lists the URLs that apply.
+- **Check the documentation before describing behaviour; it is authoritative.** The J.P. Morgan Payments Developer Portal pages linked from each reference file are the authoritative source for request/response schemas, field enums, status values, error codes, and flow behaviour — the reference files are integration guidance layered on top, and defer to the docs on any conflict. Fetch the relevant page before implementing or explaining a field, status, or error, rather than answering from memory or from how other payment providers behave. Where a reference links no page covering the question, say what you don't have and ask — don't fill the gap by inference. 
+- **Use environment-aware base URLs.** Base URLs differ between CAT and PROD and sometimes between sub-services within an environment. Read them from env vars (e.g. `JPM_CHECKOUT_API_URL`, `JPM_ONLINE_API_URL`, `JPM_TOKENIZATION_URL`, `JPM_3DS_URL`, `JPM_ACCOUNT_UPDATER_URL`, `JPM_REPORTING_URL`) rather than hardcoding. The reference file for each API lists the URLs that apply.
 - **Confirm output paths before writing.** Default to a sibling folder of the auth module (`src/checkout/`, `src/payments/`, etc.) but offer "new top-level folder" and "custom path" alternatives, the same way `jpm-oauth` did.
 - **Smoke test in CAT before PROD.** Each reference includes a minimal end-to-end test recipe — run it with the merchant's CAT credentials before any PROD config change.
-- **Hand off to `jpm-notifications` for inbound webhooks.** Several of these APIs deliver state changes via the JPM Notifications API — Online Payments (`paymentUpdateNotification`), Tokenization (`tokenLifecycleNotification`), Account Updater registration mode (`accountUpdateNotification`). Don't try to build the receiver inside this skill's code — point the merchant at `jpm-notifications` so signature verification, key rotation, and mTLS are done correctly in one place. **For Account Updater registration mode, the webhook is only step 1 of 3:** the notification payload is masked, so after receiving it the merchant must call the Account Updater `GET /account-updates/{requestId}` endpoint to retrieve the actual updated card details. Wiring only the notification (and skipping the GET) leaves the flow incomplete. 3-D Secure is synchronous-only and has no webhook events either.
+- **Hand off to `jpm-notifications` for inbound webhooks.** Several of these APIs deliver state changes via the JPM Notifications API — Online Payments (`paymentUpdateNotification`), Tokenization (`tokenLifecycleNotification`), Account Updater registration mode (`accountUpdateNotification`), Reporting (`reportStatusNotification`, so scheduled runs don't have to be polled). Don't try to build the receiver inside this skill's code — point the merchant at `jpm-notifications` so signature verification, key rotation, and mTLS are done correctly in one place. **For Account Updater registration mode, the webhook is only step 1 of 3:** the notification payload is masked, so after receiving it the merchant must call the Account Updater `GET /account-updates/{requestId}` endpoint to retrieve the actual updated card details. Wiring only the notification (and skipping the GET) leaves the flow incomplete. 3-D Secure is synchronous-only and has no webhook events either.
 - **Passthrough 3DS is connect-only, not authenticate.** If `threeDSFlow` is "Passthrough", the code you generate consumes a pre-existing cryptogram; it does not authenticate the cardholder. Confirm the merchant either already has external 3DS to connect to, or understands they must implement that upstream 3DS logic themselves — see the "Special note" in Step 2.
 
 ## Step 4 — Offer to add another
@@ -114,5 +126,5 @@ If **No**, exit with a one-line summary of which APIs were integrated this sessi
 
 - Do not re-implement OAuth inside the integration code. The merchant's auth module already handles token fetching with caching. Re-implementing it inline is what JPM's "don't generate tokens per call" guidance warns against.
 - Confirm every output file path with the user before writing.
-- Only the APIs listed in Step 2 are supported by this skill. For anything else (Reporting, In-Store, Pay by Bank, etc.), defer politely and offer a supported API instead. For inbound webhooks, hand off to `jpm-notifications`.
+- Only the APIs listed in Step 2 are supported by this skill. For anything else (Disputes, In-Store, Pay by Bank, etc.), defer politely and offer a supported API instead. For inbound webhooks, hand off to `jpm-notifications`.
 - Don't write CAT credentials into PROD config or vice versa. The auth module reads from env vars, so the merchant flips environments by switching `.env` files — never by editing source.

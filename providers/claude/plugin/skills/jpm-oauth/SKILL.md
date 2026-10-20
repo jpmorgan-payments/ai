@@ -137,7 +137,7 @@ Auth is now wired up. Ask whether the user wants to keep going into API integrat
 - Question: "Auth is in place. Want to integrate a J.P. Morgan Payments API now?"
 - Header: "Integrate API?"
 - Options:
-  - "Yes — pick an API to integrate (Checkout or Online Payments)"
+  - "Yes — pick an API to integrate"
   - "No — I'll come back later"
 
 If **Yes**, invoke the `jpm-merchant-integrations` skill via the Skill tool. It picks up from here using the auth module path and credentials context already in conversation, so the user won't be re-asked anything they've already answered.
