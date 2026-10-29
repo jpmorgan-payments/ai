@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: metrics
@@ -103,7 +103,7 @@ jobs:
             echo "Referrer stats: API returned invalid response (type: ${RESPONSE_TYPE}), recorded as no referrers"
           fi
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Apply metrics changes
           branch: metrics

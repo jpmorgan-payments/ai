@@ -10,7 +10,7 @@ dependencies = [
     "markdownify>=1.1.0",
 
     # MCP framework
-    "mcp[cli]>=1.11.0",
+    "mcp[cli]>=2.3.0,<3",
     "pydantic>=2.10.6",
 
     # HTTP and utilities

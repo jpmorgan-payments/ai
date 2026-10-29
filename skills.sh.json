@@ -12,14 +12,6 @@
         "jpm-notifications",
         "jpm-csr"
       ]
-    },
-    {
-      "title": "J.P. Morgan Payments — In-Store",
-      "description": "Semi-integrated terminal integration skills for the J.P. Morgan Payments Terminal Application on Ingenico AXIUM terminals.",
-      "skills": [
-        "jpm-instore-get-started",
-        "jpm-instore-payments"
-      ]
     }
   ]
 }
