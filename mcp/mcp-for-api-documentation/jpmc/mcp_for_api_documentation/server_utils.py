@@ -41,7 +41,6 @@ from .util import (
 )
 from importlib.metadata import version
 from loguru import logger
-from mcp.server.fastmcp import Context
 from typing import Tuple
 from urllib.parse import urlparse
 
@@ -141,7 +140,6 @@ def validate_documentation_url(url_str: str) -> None:
 
 
 async def read_documentation_page_raw(
-    ctx: Context,
     url_str: str,
 ) -> Tuple[str, str]:
     """Fetch raw HTML content from a documentation page.
@@ -152,7 +150,6 @@ async def read_documentation_page_raw(
     hop is re-validated.
 
     Args:
-        ctx: MCP context for logging and error handling
         url_str: URL of the documentation page to fetch
 
     Returns:
@@ -166,7 +163,6 @@ async def read_documentation_page_raw(
     except InvalidDocumentationUrlError as e:
         error_msg = f'Failed to fetch {url_str}: {str(e)}'
         logger.error(error_msg)
-        await ctx.error(error_msg)
         return error_msg, 'text/plain'
 
     # Configure proxy settings from environment variables
@@ -191,7 +187,6 @@ async def read_documentation_page_raw(
             except httpx.HTTPError as e:
                 error_msg = f'Failed to fetch {current_url}: {str(e)}'
                 logger.error(error_msg)
-                await ctx.error(error_msg)
                 return error_msg, 'text/plain'
 
             if response.is_redirect:
@@ -199,7 +194,6 @@ async def read_documentation_page_raw(
                 if not next_url:
                     error_msg = f'Failed to fetch {current_url}: redirect with no Location'
                     logger.error(error_msg)
-                    await ctx.error(error_msg)
                     return error_msg, 'text/plain'
 
                 try:
@@ -207,7 +201,6 @@ async def read_documentation_page_raw(
                 except InvalidDocumentationUrlError as e:
                     error_msg = f'Failed to fetch {current_url}: redirected to disallowed URL {next_url}: {str(e)}'
                     logger.error(error_msg)
-                    await ctx.error(error_msg)
                     return error_msg, 'text/plain'
 
                 current_url = next_url
@@ -216,19 +209,16 @@ async def read_documentation_page_raw(
             if response.status_code >= 400:
                 error_msg = f'Failed to fetch {current_url} - status code {response.status_code}'
                 logger.error(error_msg)
-                await ctx.error(error_msg)
                 return error_msg, 'text/plain'
 
             return response.text, response.headers.get('content-type', '')
 
     error_msg = f'Failed to fetch {url_str}: too many redirects'
     logger.error(error_msg)
-    await ctx.error(error_msg)
     return error_msg, 'text/plain'
 
 
 async def read_documentation_impl(
-    ctx: Context,
     url_str: str,
     max_length: int,
     start_index: int,
@@ -237,7 +227,6 @@ async def read_documentation_impl(
     """Process and format documentation page content.
 
     Args:
-        ctx: MCP context for logging and error handling
         url_str: URL of the documentation page to fetch
         max_length: Maximum number of characters to return
         start_index: Index to start reading from for pagination
@@ -249,7 +238,7 @@ async def read_documentation_impl(
     logger.debug(f'Processing documentation from {url_str}')
 
     # Fetch raw page content
-    page_raw, content_type = await read_documentation_page_raw(ctx, url_str)
+    page_raw, content_type = await read_documentation_page_raw(url_str)
     if not page_raw or page_raw.startswith('Failed to fetch'):
         return page_raw
 

@@ -42,11 +42,13 @@ import uuid
 import httpx
 from bs4 import BeautifulSoup
 from loguru import logger
-from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.mcpserver import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import Field
 from typing import Dict, List
 
 # Local imports
+from . import __version__
 from .models import (
     RecommendationResult,
     SearchResult,
@@ -73,8 +75,9 @@ SEARCH_API_URL = 'https://developer.payments.jpmorgan.com/console/api/search'
 SESSION_UUID = str(uuid.uuid4())
 
 # Initialize MCP server
-mcp = FastMCP(
+mcp = MCPServer(
     'jpmc-pdp-doc-mcp-server',
+    version=__version__,
     instructions="""
     # JPMC-PDP Documentation MCP Server
 
@@ -97,7 +100,6 @@ mcp = FastMCP(
 
 @mcp.tool()
 async def search_documentation(
-    ctx: Context,
     search_phrase: str = Field(description='Search phrase to use'),
     limit: int = Field(
         default=10,
@@ -123,7 +125,6 @@ async def search_documentation(
     - context: A brief excerpt or summary (if available)
 
     Args:
-        ctx: MCP context for logging and error handling
         search_phrase: Search phrase to use
         limit: Maximum number of results to return
 
@@ -156,13 +157,11 @@ async def search_documentation(
         except httpx.HTTPError as e:
             error_msg = f'Error searching JPMC-PDP docs: {str(e)}'
             logger.error(error_msg)
-            await ctx.error(error_msg)
             return [SearchResult(rank_order=1, url='', title=error_msg, context=None)]
 
         if response.status_code >= 400:
             error_msg = f'Error searching JPMC-PDP docs - status code {response.status_code}'
             logger.error(error_msg)
-            await ctx.error(error_msg)
             return [
                 SearchResult(
                     rank_order=1,
@@ -177,7 +176,6 @@ async def search_documentation(
         except json.JSONDecodeError as e:
             error_msg = f'Error parsing search results: {str(e)}'
             logger.error(error_msg)
-            await ctx.error(error_msg)
             return [
                 SearchResult(
                     rank_order=1,
@@ -216,8 +214,18 @@ async def search_documentation(
 
 @mcp.tool()
 async def read_documentation(
-    ctx: Context,
     url: str = Field(description='URL of the JPMC documentation page to read'),
+    max_length: int = Field(
+        default=5000,
+        description='Maximum number of characters to return',
+        ge=1,
+        le=100000,
+    ),
+    start_index: int = Field(
+        default=0,
+        description='Character offset to start reading from, for paging through long documents',
+        ge=0,
+    ),
 ) -> str:
     """Fetch and convert a JPMC Payments API documentation page to markdown format.
 
@@ -244,8 +252,9 @@ async def read_documentation(
     - Lists and tables converted to markdown format
 
     Args:
-        ctx: MCP context for logging and error handling
         url: URL of the JPMC PDP documentation page to read
+        max_length: Maximum number of characters to return
+        start_index: Character offset to start reading from
 
     Returns:
         Markdown content of the JPMC-PDP documentation
@@ -255,15 +264,14 @@ async def read_documentation(
     try:
         validate_documentation_url(url_str)
     except InvalidDocumentationUrlError as e:
-        await ctx.error(str(e))
-        raise ValueError(str(e)) from e
+        logger.error(str(e))
+        raise ToolError(str(e)) from e
 
-    return await read_documentation_impl(ctx, url_str, 5000, 0, SESSION_UUID)
+    return await read_documentation_impl(url_str, max_length, start_index, SESSION_UUID)
 
 
 @mcp.tool()
 async def related(
-    ctx: Context,
     url: str = Field(
         description='URL of the JPMC-PDP documentation page to get related pages for'
     ),
@@ -291,7 +299,6 @@ async def related(
     - context: A brief description (if available)
 
     Args:
-        ctx: MCP context for logging and error handling
         url: URL of the JPMC-PDP documentation page to get recommendations for
 
     Returns:
@@ -302,10 +309,9 @@ async def related(
     logger.debug(f'Getting related pages for: {url_str}')
 
     # Fetch the HTML content of the page
-    raw_html, content_type = await read_documentation_page_raw(ctx, url_str)
+    raw_html, content_type = await read_documentation_page_raw(url_str)
     if not raw_html or raw_html.startswith('Failed to fetch'):
         logger.warning(f'Could not fetch content from {url_str}')
-        await ctx.error(f'Failed to retrieve content from {url_str}')
         return []
 
     # Parse HTML with BeautifulSoup and extract related links
@@ -316,7 +322,6 @@ async def related(
         main_content = soup.find(id='main-content')
         if not main_content:
             logger.warning(f'Could not find main-content in {url_str}')
-            await ctx.error(f'Could not find main content area in the page: {url_str}')
             return []
 
         # Store unique results in a dictionary keyed by href to avoid duplicates
@@ -342,7 +347,6 @@ async def related(
     except Exception as e:
         error_msg = f'Error extracting related links: {str(e)}'
         logger.error(error_msg)
-        await ctx.error(error_msg)
         return []
 
 

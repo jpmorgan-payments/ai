@@ -184,6 +184,25 @@ flowchart LR
 
 ---
 
+## Digital Wallets (Apple Pay, Google Pay, Paze)
+
+A wallet has two halves:
+
+- **Server half** — send the wallet's encrypted payload to `POST /payments` like any other payment method (see the samples below).
+- **Browser half** — if the merchant has a web or app UI, integrate the browser side too: availability detection, the wallet button, the payment sheet, and capturing the encrypted payload to POST to your backend. Get the SDK, button, and CSS from the provider's own developer docs (never from this skill or a third-party tutorial, since providers version their branding and revoke non-compliant buttons).
+
+The JPM PDP payment-method page for each wallet is the source of truth and links out to the provider's docs. Read it, and the provider docs it links to, for everything you need — the `paymentMethodType` shape, config fields, SDK, button CSS, availability detection, session events, testing, and go-live steps:
+
+- **Apple Pay** — <https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fcapabilities%2Fonline-payments%2Fpayment-methods%2Fapple-pay.md>
+- **Google Pay** — <https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fcapabilities%2Fonline-payments%2Fpayment-methods%2Fgoogle-pay.md>
+- **Paze** — <https://developer.payments.jpmorgan.com/api/llm-content?path=en%2Fdocs%2Fcommerce%2Fonline-payments%2Fcapabilities%2Fonline-payments%2Fpayment-methods%2Fpaze.md>
+
+If the PDP page doesn't link out or the linked docs are unreachable, go straight to the provider's official developer site rather than prompting the user.
+
+**Environment variables — required.** For every config value a wallet needs (merchant identifiers, gateway parameters, certificate paths, client IDs, gateway merchant IDs), reference it in code by an env variable name (e.g. `JPM_APPLEPAY_MERCHANT_ID`) and **append that variable name with an empty placeholder value to the project's `.env.example`** — do this for each value as you wire it in. Never guess a real value, never block waiting for one, and never overwrite a value the user already set; the user fills them in after the integration is built.
+
+---
+
 ## Sample Requests
 
 ### Authorize and Capture Now (Card)
