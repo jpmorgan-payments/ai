@@ -13,8 +13,12 @@ if [ -z "$2" ]; then
   echo "Usage: $0 <your_argument>"
   exit 1
 fi
-# Access the first command-line argument
-output_file="./${2}.csv"
+output_name="$2"
+if [[ ! "$output_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+  echo "Error: output name must contain only letters, numbers, dots, underscores, and hyphens."
+  exit 1
+fi
+output_file="./${output_name}.csv"
 
 # Specify the input file names
 file1="1.csv"
@@ -46,7 +50,7 @@ if [ ! -f "$output_file" ]; then
 fi
 
 # Sort the CSV file by the second column (date)
-sorted_csv_file="./${2}-sorted.csv"
+sorted_csv_file="./${output_name}-sorted.csv"
 if [ -e "$sorted_csv_file" ]; then
   rm "$sorted_csv_file"
 fi
