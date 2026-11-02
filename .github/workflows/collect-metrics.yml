@@ -103,7 +103,7 @@ jobs:
             echo "Referrer stats: API returned invalid response (type: ${RESPONSE_TYPE}), recorded as no referrers"
           fi
 
-      - uses: stefanzweifel/git-auto-commit-action@v7
+      - uses: stefanzweifel/git-auto-commit-action@d0b01107b5db882071f96de5dd4b54961ea93f4c # v7
         with:
           commit_message: Apply metrics changes
           branch: metrics

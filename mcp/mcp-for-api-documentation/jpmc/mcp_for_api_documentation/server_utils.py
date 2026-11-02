@@ -64,7 +64,7 @@ DEFAULT_USER_AGENT = (
 # route through validate_documentation_url() / read_documentation_page_raw()
 # below rather than reimplementing this check, so the allowlist can't drift
 # out of sync between tools again.
-ALLOWED_DOC_URL_PATTERN = re.compile(r'^https?://developer\.payments\.jpmorgan\.com(/.*)?$')
+ALLOWED_DOC_URL_PATTERN = re.compile(r'^https://developer\.payments\.jpmorgan\.com(/.*)?$')
 
 # Cap on redirect hops we will follow for a single fetch.
 MAX_REDIRECTS = 5
@@ -118,9 +118,9 @@ def validate_documentation_url(url_str: str) -> None:
     """
     parsed = urlparse(url_str)
 
-    if parsed.scheme not in ('http', 'https'):
+    if parsed.scheme != 'https':
         raise InvalidDocumentationUrlError(
-            f'Invalid URL: {url_str}. Only http/https URLs are allowed'
+            f'Invalid URL: {url_str}. Only HTTPS URLs are allowed'
         )
 
     if parsed.username or parsed.password:
