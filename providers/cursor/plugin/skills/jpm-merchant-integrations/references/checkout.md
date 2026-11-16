@@ -121,7 +121,7 @@ endpoint POST /api/create-checkout-session:
 POST https://merchant-api.checkout-cat.merchant.jpmorgan.com/v1/checkout/intent
 Content-Type: application/json
 Authorization: Bearer eyJ0eXAiOiJKV1Qi…
-merchantId: 996897591058
+merchantId: 1234567891011
 requestId: cffbe6dbfb94bce8a1b2c3
 
 {
@@ -347,7 +347,7 @@ GET https://merchant-api.checkout-cat.merchant.jpmorgan.com/v1/checkout/notifica
   &periodEnd=2026-03-11T18:20:53Z
 Content-Type: application/json
 Authorization: Bearer eyJ0eXAiOiJKV1Qi…
-merchantId: 996897591058
+merchantId: 1234567891011
 requestId: 5512281667746c1b1234
 ```
 
