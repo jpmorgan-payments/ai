@@ -9,7 +9,7 @@ Reuse what's already in `package.json`. If neither category is present, install:
 
 ## Reference module (TypeScript, Node 18+, ESM)
 
-Replace `<DEFAULT_TTL_SEC>` with the chosen JWT TTL in seconds (e.g. `28800` for 8h, `15552000` for 6 months).
+Replace `<DEFAULT_TTL_SEC>` with the chosen JWT TTL in seconds (e.g. `28800` for 8h).
 
 ```typescript
 // jpmAuth.ts
