@@ -1,0 +1,117 @@
+### J.P. Morgan Payments Notifications API
+### Execute these requests in VS Code REST Client or IntelliJ HTTP Client.
+### Consult the Notifications Bruno collection for the current covered request shapes.
+
+@baseUrl = {{$dotenv JPM_NOTIFICATIONS_API_URL}}
+@accessToken = {{$dotenv JPM_ACCESS_TOKEN}}
+@merchantId = MERCH-12345
+@entityType = MERCHANT
+@subscriptionId = REPLACE_WITH_SUBSCRIPTION_ID
+@requestId = {{$guid}}
+
+### Get all notification event types
+GET {{baseUrl}}/v1/notificationTypes
+Authorization: Bearer {{accessToken}}
+request-id: {{requestId}}
+
+### Get the signing public keys (JWKS)
+GET {{baseUrl}}/v1/public-keys
+Authorization: Bearer {{accessToken}}
+request-id: {{$guid}}
+merchant-id: {{merchantId}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+### Get all subscriptions by entity ID
+GET {{baseUrl}}/v1/subscriptions
+Authorization: Bearer {{accessToken}}
+request-id: {{$guid}}
+merchant-id: {{merchantId}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+### Get a subscription by subscription ID
+GET {{baseUrl}}/v1/subscriptions/{{subscriptionId}}
+Authorization: Bearer {{accessToken}}
+request-id: {{$guid}}
+merchant-id: {{merchantId}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+### Subscribe to a notification (confirm before sending)
+POST {{baseUrl}}/v1/subscriptions
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+request-id: {{$guid}}
+merchant-id: {{merchantId}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+{
+	"notifications": {
+		"paymentUpdateNotification": ["All"]
+	},
+	"subscriptionChannels": ["WEBHOOK"],
+	"callbackURL": "https://your-merchant-domain.example.com/notifications",
+	"securityPreferences": {
+		"webhookAuthorizationType": "none",
+		"signingAlgorithm": "EC"
+	}
+}
+
+### Update a specific subscription (confirm before sending)
+PUT {{baseUrl}}/v1/subscriptions/{{subscriptionId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+request-id: {{$guid}}
+merchant-id: {{merchantId}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+{
+	"notifications": {
+		"paymentUpdateNotification": ["All"]
+	},
+	"subscriptionChannels": ["WEBHOOK"],
+	"callbackURL": "https://your-merchant-domain.example.com/notifications",
+	"securityPreferences": {
+		"webhookAuthorizationType": "none",
+		"signingAlgorithm": "EC"
+	}
+}
+
+### Delete a specific subscription (confirm before sending)
+DELETE {{baseUrl}}/v1/subscriptions/{{subscriptionId}}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+request-id: {{$guid}}
+merchant-id: {{merchantId}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+### Get webhook verification status (not in Bruno)
+GET {{baseUrl}}/v1/subscriptions/verifications/REPLACE_WITH_REQUEST_ID
+Authorization: Bearer {{accessToken}}
+request-id: {{$guid}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+### Get one stored notification (not in Bruno)
+GET {{baseUrl}}/v1/notifications/REPLACE_WITH_NOTIFICATION_ID
+Authorization: Bearer {{accessToken}}
+request-id: {{$guid}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+### Get stored notifications by filters (not in Bruno)
+GET {{baseUrl}}/v1/notifications?startdate=2026-02-01&enddate=2026-02-28&status=SENT
+Authorization: Bearer {{accessToken}}
+request-id: {{$guid}}
+entity-type: {{entityType}}
+entity-id: {{merchantId}}
+
+### Health check for the Notification Subscription service
+GET {{baseUrl}}/healthcheck/notification-subscriptions
+Authorization: Bearer {{accessToken}}
+request-id: {{$guid}}
+merchant-id: {{merchantId}}
