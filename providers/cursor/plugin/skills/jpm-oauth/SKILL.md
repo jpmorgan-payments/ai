@@ -1,6 +1,6 @@
 ---
 name: jpm-oauth
-description: Implement J.P. Morgan Payments OAuth authentication (JWT signing + IDAnywhere token exchange) in a merchant project. Use this skill when a merchant has their clientId, certificate, private key, and SHA-1 thumbprint and wants to generate the auth code in their codebase — typically right after running jpm-integrations-get-started. Produces a language-specific auth module with built-in token caching that follows JPM guidance against regenerating tokens per request. Supports Node/TypeScript, Python, and Java idiomatically; for other languages, translates from the canonical algorithm. Asks for target environment (CAT or PROD) and JWT TTL (default 6 months for CAT, 8h for PROD per JPM guidance); the resource_id is read from the merchant's `.env` at runtime rather than collected interactively.
+description: Implement J.P. Morgan Payments OAuth authentication (JWT signing + IDAnywhere token exchange) in a merchant project. Use this skill when a merchant has their clientId, certificate, private key, and SHA-1 thumbprint and wants to generate the auth code in their codebase — typically right after running jpm-integrations-get-started. Produces a language-specific auth module with built-in token caching that follows JPM guidance against regenerating tokens per request. Supports Node/TypeScript, Python, and Java idiomatically; for other languages, translates from the canonical algorithm. Asks for target environment (CAT or PROD) and JWT TTL; the resource_id is read from the merchant's `.env` at runtime rather than collected interactively.
 metadata:
   version: 2.0.0
   lob: commerce
@@ -46,24 +46,20 @@ Show the user this guidance verbatim before asking the TTL question:
 >
 > - **Access token TTL** — set by JPM's IDAnywhere server, returned as `expires_in` (seconds) in every token response. The generated module reads this value and reuses the access token across requests until shortly before it expires. Don't treat it as fixed — server-side defaults can change.
 >
-> - **JWT TTL** — client-controlled (you pick). The JWT is the credential you hand to IDAnywhere to *get* an access token. JPM's guidance: **8 hours for PROD**; longer is fine for **CAT**.
+> - **JWT TTL** — client-controlled (you pick). The JWT is the credential you hand to IDAnywhere to *get* an access token.
 >
 > **Anti-pattern to avoid**: generating a fresh JWT *and* a fresh access token on every API call (think of it like running a card auth on a brand-new payment instrument every transaction — wasteful and slow). The access token is reusable until expiry. The generated module caches it in memory and only refreshes it when within ~30s of expiry. Call `getAccessToken()` once per outbound request and let the cache do its job.
 
-Then ask, with default options that depend on the environment chosen in Step 2:
+Then ask:
 
 - Question: "How long should JWTs be valid?"
 - Header: "JWT TTL"
-- Options for **PROD** or **Both**:
-  - "8 hours"
+- Options:
   - "1 hour"
-  - "Custom"
-- Options for **CAT** only:
-  - "6 months"
   - "8 hours"
   - "Custom"
 
-If "Custom", prompt free text. Accept forms like `8h`, `30d`, `6mo`, `3600s`. Convert to seconds before generating code.
+If "Custom", prompt free text. Accept forms like `30m`, `8h`, `3600s`. Convert to seconds before generating code.
 
 ## Step 4 — Language and libraries
 
@@ -91,7 +87,7 @@ Always echo the final path back to the user and wait for confirmation before any
 3. Generate two artifacts:
    - **Auth module** — exports a `getAccessToken()` function (or language-equivalent name) with built-in caching and an in-flight mutex.
    - **Usage example** — a short snippet showing the module wired into one outbound API call (e.g. a Bearer header on a Checkout API request). Place it as a comment block at the bottom of the auth module, or as a sibling `example.<ext>` file if the user prefers that layout.
-4. Replace any `<DEFAULT_TTL_SEC>` placeholders in the reference code with the actual TTL chosen in Step 3, expressed in seconds (e.g. `28800` for 8h, `15552000` for 6 months).
+4. Replace any `<DEFAULT_TTL_SEC>` placeholders in the reference code with the actual TTL chosen in Step 3, expressed in seconds (e.g. `28800` for 8h).
 5. Write the file(s) to the path confirmed in Step 5.
 
 If "Both" was chosen in Step 2, the generated code reads `JPM_RESOURCE_ID` from the environment so the same binary works in CAT or PROD by swapping the `.env`. There's no per-environment branching in the source.
