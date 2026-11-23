@@ -64,8 +64,6 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv]
-# Security floors for transitive dependencies (soupsieve: GHSA ReDoS + descendant-combinator DoS;
-# filelock: ReadWriteLock symlink/journal attack). Both fixed versions require Python >=3.11.5.
 constraint-dependencies = [
     "soupsieve>=4.0",
     "filelock>=4.2.1",
