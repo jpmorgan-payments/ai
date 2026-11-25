@@ -25,7 +25,7 @@ This MCP server provides three core capabilities to enhance your development exp
 
 Ensure your development environment meets these requirements:
 
-- **Python**: Version 3.10 or newer
+- **Python**: Version 3.11.5 or newer
 - **Package Manager**: `uv` or `pip`
 - **Development Tools**: Git and Node.js (required for MCP Inspector testing)
 

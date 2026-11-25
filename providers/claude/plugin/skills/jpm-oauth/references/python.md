@@ -7,7 +7,7 @@
 
 ## Reference module
 
-Replace `<DEFAULT_TTL_SEC>` with the chosen JWT TTL in seconds (e.g. `28800` for 8h, `15552000` for 6 months).
+Replace `<DEFAULT_TTL_SEC>` with the chosen JWT TTL in seconds (e.g. `28800` for 8h).
 
 ```python
 # jpm_auth.py
